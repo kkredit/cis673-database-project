@@ -1,0 +1,9 @@
+# SQLplus login script
+startOracleSql.sh
+
+# Windows stuff
+*.ini
+
+# Vim
+*.un~
+*.swp
