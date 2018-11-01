@@ -11,3 +11,6 @@ The database stores information to help cleaning services customers and
 providers connect to one another. Customers create orders consisting of
 particular cleaning tasks, and providers bid on those orders. The customer
 chooses a winning bid, and the business connection is made.
+
+# Team Members
+Kevin Kredit
