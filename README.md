@@ -13,5 +13,6 @@ particular cleaning tasks, and providers bid on those orders. The customer
 chooses a winning bid, and the business connection is made.
 
 # Team Members
+Akshay Kumar Khandgonda (Khandgonda)
 Kevin Kredit (kkredit)
 Vineet James (jamesvin)
