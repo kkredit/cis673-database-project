@@ -5,6 +5,7 @@ SET ECHO ON
 CIS 673 - Database Design Project
 Team 4:
 - Kevin Kredit
+- Vineet James
 */
 --
 --
