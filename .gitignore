@@ -1,5 +1,9 @@
 # SQLplus login script
 startOracleSql.sh
+runProject.sh
+
+# SQL output
+*.out
 
 # Windows stuff
 *.ini
