@@ -1,9 +1,10 @@
-SPOOL project.out
+﻿SPOOL project.out
 SET ECHO ON
 --
 /*
 CIS 673 - Database Design Project
 Team 4:
+- Akshay Kumar Khandgonda
 - Kevin Kredit
 - Vineet James
 */
