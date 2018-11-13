@@ -8,11 +8,7 @@ Team 4:
 - Kevin Kredit
 - Vineet James
 - Sanil Apte
-<<<<<<< HEAD
 -Brian Mbeere
-=======
-- Brian Mbeere
->>>>>>> master
 */
 --
 --
@@ -79,7 +75,7 @@ orderNo     INTEGER,
 photo       VARCHAR2(30),
 -- Order_Photos_Key: A unique photo corresponding to an order is identified by its OrderNo and Photo.
 CONSTRAINT Order_Photos_Key PRIMARY KEY (orderNo,photo),
--- Order_Photos_2R_1: An Order limits maximum of ‘5’ photo uploads.
+-- Order_Photos_2R_1: An Order limits maximum of ï¿½5ï¿½ photo uploads.
 --<<CONSTRAINT Order_Photos_2R_1 DOUBT>>
 );
 --
@@ -90,11 +86,11 @@ CONSTRAINT Order_Photos_Key PRIMARY KEY (orderNo,photo),
 --ADDING FOREIGN KEY CONSTRAINTS
 --
 Alter table Provider_Branch
--- P_Branch_FK_1: A Provider_Branch’s P_UserName refers to the pUserName in the Provider relation.
+-- P_Branch_FK_1: A Provider_Branchï¿½s P_UserName refers to the pUserName in the Provider relation.
 add CONSTRAINT P_Branch_FK_1 FOREIGN KEY (pUserName) REFERENCES Provider(pUserName);
 
 Alter table Order_Photos
--- Order_Photos_FK_1: An Order_Photos’s OrderNo refers to the OrderNo in the Order relation.
+-- Order_Photos_FK_1: An Order_Photosï¿½s OrderNo refers to the OrderNo in the Order relation.
 add CONSTRAINT Order_Photos_FK_1 FOREIGN KEY (orderNo) REFERENCES Order(orderNo);
 --
 --
@@ -121,7 +117,7 @@ desc varchar2(50),
 CONSTRAINT Reviews_Key Primary Key (cUserName,pUserName),
 -- Reviews_1A_1: A review's revDate may not be null
 CONSTRAINT Reviews_1A_1 check (revDate is not null),
--- Reviews_1A_2: A review’s Rating is between 0 and 5 (inclusive)
+-- Reviews_1A_2: A reviewï¿½s Rating is between 0 and 5 (inclusive)
 CONSTRAINT Reviews_1A_2 check (not(rating<0 or rating>5))
 );
 --
@@ -141,21 +137,21 @@ CONSTRAINT TaskOrderKey Primary Key (orderNo,taskName)
 -- ADDING FOREIGN KEYS
 --
 ALTER Table Provider_Specialized_Task
--- P_Specialized_Task_FK_1: A Provider_Specialized_Task’s P_UserName refers to the P_UserName in the Provider relation.
+-- P_Specialized_Task_FK_1: A Provider_Specialized_Taskï¿½s P_UserName refers to the P_UserName in the Provider relation.
 ADD CONSTRAINT P_Specialized_TaskFK_1 Foreign Key (pUserName) References provider (pUserName),
--- P_Specialized_Task_FK_2: A Provider_Specialized_Task’s TaskName refers to the TaskName in the Task relation.
+-- P_Specialized_Task_FK_2: A Provider_Specialized_Taskï¿½s TaskName refers to the TaskName in the Task relation.
 ADD CONSTRAINT P_Specialized_TaskFK_2 Foreign Key (taskName) References  task (taskName);
 
 ALTER Table Reviews
--- Reviews_FK_1: A Reviews’s C_UserName refers to the  C_UserName in the Customer relation.
+-- Reviews_FK_1: A Reviewsï¿½s C_UserName refers to the  C_UserName in the Customer relation.
 ADD CONSTRAINT Reviews_FK_1 Foreign Key (cUserName) References customer (cUserName),
--- Reviews_FK_2: A Reviews’s P_UserName refers to the  P_UserName in the Provider relation.
+-- Reviews_FK_2: A Reviewsï¿½s P_UserName refers to the  P_UserName in the Provider relation.
 ADD CONSTRAINT Reviews_FK_2 Foreign Key (pUserName) References provider (pUserName);
 
 ALTER Table Task_in_Order
--- TaskOrder_FK_1: A task-order’s orderNum refers to an orderNo in the Order relation.
+-- TaskOrder_FK_1: A task-orderï¿½s orderNum refers to an orderNo in the Order relation.
 ADD CONSTRAINT TaskOrder_FK_1 Foreign Key (orderNo) References order (orderNo),
--- TaskOrder_FK_2: A task-order’s TaskName refers to a TaskName in the Task relation.
+-- TaskOrder_FK_2: A task-orderï¿½s TaskName refers to a TaskName in the Task relation.
 ADD CONSTRAINT TaskOrder_FK_2 Foreign key (taskName) References task (taskName);
 */
 
@@ -177,7 +173,7 @@ COMMIT;
 -- < The SQL queries >
 -- Include the following for each query:
 --   1. A comment line stating the query number and the feature(s) it demonstrates
---      (e.g. -- Q25 – correlated subquery ).
+--      (e.g. -- Q25 ï¿½ correlated subquery ).
 --   2. A comment line stating the query in English.
 --   3. The SQL code for the query.
 --
