@@ -8,12 +8,12 @@ Team 4:
 - Kevin Kredit
 - Vineet James
 - Sanil Apte
--Brian Mbeere
+- Brian Mbeere
 */
 --
 --
 -- < The SQL/DDL code that creates your schema >
-
+--
 CREATE TABLE  Customer (
 cuserName   varchar(255) NOT NULL,
 custAddr     varchar(255)  NOT NULL, 
@@ -22,9 +22,8 @@ custBio        varchar(255),
 IC    Customer_Key       PRIMARY KEY (cuserName) ,
 IC    Customer_FK1      cuserName    FOREIGN KEY   REFERENCES User(userName),
 IC    Customer_1A_2        CHECK (cType IN("Professional","Personal")
-
 )
-
+--
 CREATE TABLE  Order(
 ocUserName         varchar(255),
 orderNo               int,
@@ -33,9 +32,7 @@ orderDesc           varchar(255) NOT NULL,
 orderLoc             varchar (255) NOT NULL,
 datePosted         datetime,
 bidcloseTime      datetime,
-    
 IC  Order_FK_1   ocuserName FOREIGN KEY REFERENCES Customer(cuserName)
-
 )
 -- In the DDL, every IC must have a unique name; e.g. IC5, IC10, IC15, etc.
 --
@@ -131,7 +128,6 @@ CONSTRAINT TaskOrderKey Primary Key (orderNo,taskName)
 );
 --
 -- -------------------------------------------------------------------
-
 /*
 --
 -- ADDING FOREIGN KEYS
