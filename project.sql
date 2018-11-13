@@ -14,35 +14,15 @@ Team 4:
 --
 --
 -- < The SQL/DDL code that creates your schema >
---
-CREATE TABLE  Customer (
-cuserName   varchar(255) NOT NULL,
-custAddr     varchar(255)  NOT NULL, 
-cType          varchar(100)  NOT NULL,
-custBio        varchar(255),
-IC    Customer_Key       PRIMARY KEY (cuserName) ,
-IC    Customer_FK1      cuserName    FOREIGN KEY   REFERENCES User(userName),
-IC    Customer_1A_2        CHECK (cType IN("Professional","Personal")
-)
---
-CREATE TABLE  Order(
-ocUserName         varchar(255),
-orderNo               int,
-desiredPrice        int,
-orderDesc           varchar(255) NOT NULL,
-orderLoc             varchar (255) NOT NULL,
-datePosted         datetime,
-bidcloseTime      datetime,
-IC  Order_FK_1   ocuserName FOREIGN KEY REFERENCES Customer(cuserName)
-)
 -- In the DDL, every IC must have a unique name; e.g. IC5, IC10, IC15, etc.
 --
 -- CREATING THE TABLES
 -- --------------------------------------------------------------------
+--
 CREATE TABLE  AppUser
 (
 userName     INTEGER,
-fullName   VARCHAR2(20), 
+fullName   VARCHAR2(20),
 phone  INTEGER,
 email     VARCHAR2(30),
 userType VARCHAR2(20),
@@ -57,7 +37,26 @@ CONSTRAINT AppUser_1A_2 CHECK (userType IN ('Customer', 'Provider')),
 CONSTRAINT AppUser_2A_1 CHECK (NOT (phone is NULL AND email is NULL))
 );
 --
--- -------------------------------------------------------------------
+CREATE TABLE  Customer (
+cuserName   varchar(255) NOT NULL,
+custAddr     varchar(255)  NOT NULL,
+cType          varchar(100)  NOT NULL,
+custBio        varchar(255),
+CONSTRAINT Customer_Key       PRIMARY KEY (cuserName) ,
+CONSTRAINT Customer_FK1      FOREIGN KEY(cuserName)    REFERENCES AppUser(userName),
+CONSTRAINT Customer_1A_2        CHECK (cType IN("Professional","Personal"))
+);
+--
+CREATE TABLE  Order(
+ocUserName         varchar(255),
+orderNo               int,
+desiredPrice        int,
+orderDesc           varchar(255) NOT NULL,
+orderLoc             varchar (255) NOT NULL,
+datePosted         datetime,
+bidcloseTime      datetime,
+CONSTRAINT  Order_FK_1  FOREIGN KEY(ocuserName)  REFERENCES Customer(cuserName)
+);
 CREATE TABLE  Provider_Branch
 (
 pUserName         INTEGER,
@@ -66,7 +65,6 @@ branchAddress       VARCHAR2(30),
 CONSTRAINT P_Branch_Key PRIMARY KEY (pUserName,branchAddress)
 );
 --
--- -------------------------------------------------------------------
 CREATE TABLE  Order_Photos
 (
 orderNo     INTEGER,
@@ -78,7 +76,6 @@ CONSTRAINT Order_Photos_Key PRIMARY KEY (orderNo,photo),
 );
 --
 -- -------------------------------------------------------------------
-
 /*
 --
 --ADDING FOREIGN KEY CONSTRAINTS
@@ -151,7 +148,7 @@ ADD CONSTRAINT TaskOrder_FK_1 Foreign Key (orderNo) References order (orderNo),
 -- TaskOrder_FK_2: A task-order�s TaskName refers to a TaskName in the Task relation.
 ADD CONSTRAINT TaskOrder_FK_2 Foreign key (taskName) References task (taskName);
 */
-
+--
 SET FEEDBACK OFF
 --
 --
