@@ -21,7 +21,7 @@ cType          varchar(100)  NOT NULL,
 custBio        varchar(255),
 IC    Customer_Key       PRIMARY KEY (cuserName) ,
 IC    Customer_FK1      cuserName    FOREIGN KEY   REFERENCES User(userName),
-IC    Customer_1A_2        CHECK (cType= Professional or Personal)
+IC    Customer_1A_2        CHECK (cType IN("Professional","Personal")
 
 )
 
