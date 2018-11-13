@@ -1,6 +1,7 @@
 # SQLplus helper scripts
 startOracleSql.sh
 runProject.sh
+tabcomplete.sql
 
 # SQLplus output
 *.out
