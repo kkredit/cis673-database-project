@@ -11,14 +11,15 @@ Team 4:
 - Sanil Apte
 - Brian Mbeere
 */
---
---
--- < The SQL/DDL code that creates your schema >
--- In the DDL, every IC must have a unique name; e.g. IC5, IC10, IC15, etc.
---
--- CREATING THE TABLES
 -- --------------------------------------------------------------------
+-- CLEAN UP LAST RUN
+-- --------------------------------------------------------------------
+@_drop
 --
+--
+-- --------------------------------------------------------------------
+-- CREATE THE TABLES
+-- --------------------------------------------------------------------
 CREATE TABLE  AppUser
 (
 userName     INTEGER,
