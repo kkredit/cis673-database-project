@@ -1,5 +1,3 @@
-SET ECHO OFF
-SET FEEDBACK OFF
 --
 -- Function courtesy of Henry Gao
 -- See https://stackoverflow.com/questions/1690404/how-to-drop-all-user-tables
@@ -46,4 +44,3 @@ BEGIN
    END LOOP;
 END;
 /
-SET ECHO ON
