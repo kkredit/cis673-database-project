@@ -24,56 +24,55 @@ SET ECHO ON
 -- --------------------------------------------------------------------
 CREATE TABLE  AppUser
 (
-userName     INTEGER,
-fullName   VARCHAR2(20),
-phone  INTEGER,
-email     VARCHAR2(30),
-userType VARCHAR2(20),
---
--- AppUser_Key: UserNames are unique
-CONSTRAINT AppUser_Key PRIMARY KEY (userName),
--- AppUser_1A_1: A user must provide their full names before being registered.
-CONSTRAINT AppUser_1A_1 CHECK (fullName is not null),
--- AppUser_1A_2: A user's userType should be 'Customer' or 'Provider'.
-CONSTRAINT AppUser_1A_2 CHECK (userType IN ('Customer', 'Provider')),
--- AppUser_2A_1: A user may at least have a phone or email (Both cannot be null).
-CONSTRAINT AppUser_2A_1 CHECK (NOT (phone is NULL AND email is NULL))
+userName    VARCHAR(64) NOT NULL,
+fullName    VARCHAR(64) NOT NULL,
+phone       INTEGER,
+email       VARCHAR(64),
+userType    VARCHAR(64),
+CONSTRAINT AppUser_Key      PRIMARY KEY(userName),
+CONSTRAINT AppUser_1A_2     CHECK (userType IN ('Customer', 'Provider')),
+CONSTRAINT AppUser_2A_1     CHECK (NOT (phone is NULL AND email is NULL))
 );
 --
 CREATE TABLE  Customer (
-cuserName   varchar(255) NOT NULL,
-custAddr     varchar(255)  NOT NULL,
-cType          varchar(100)  NOT NULL,
-custBio        varchar(255),
-CONSTRAINT Customer_Key       PRIMARY KEY (cuserName) ,
-CONSTRAINT Customer_FK1      FOREIGN KEY(cuserName)    REFERENCES AppUser(userName),
-CONSTRAINT Customer_1A_2        CHECK (cType IN("Professional","Personal"))
+cuserName   VARCHAR(64) NOT NULL,
+custAddr    VARCHAR(64) NOT NULL,
+cType       VARCHAR(64) NOT NULL,
+custBio     VARCHAR(64),
+CONSTRAINT Customer_Key     PRIMARY KEY(cuserName) ,
+CONSTRAINT Customer_FK1     FOREIGN KEY(cuserName) REFERENCES AppUser(userName),
+CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
+);
+--
+CREATE TABLE  Provider (
+pUserName   VARCHAR(64) NOT NULL
 );
 --
 CREATE TABLE  Order(
-ocUserName         varchar(255),
-orderNo               int,
-desiredPrice        int,
-orderDesc           varchar(255) NOT NULL,
-orderLoc             varchar (255) NOT NULL,
-datePosted         datetime,
-bidcloseTime      datetime,
-CONSTRAINT  Order_FK_1  FOREIGN KEY(ocuserName)  REFERENCES Customer(cuserName)
+ocUserName      BASE_STE,
+orderNo         INT,
+desiredPrice    INT,
+orderDesc       VARCHAR(64) NOT NULL,
+orderLoc        VARCHAR(64) NOT NULL,
+datePosted      DATETIME,
+bidcloseTime    DATETIME,
+CONSTRAINT  Order_FK_1  FOREIGN KEY(ocuserName) REFERENCES Customer(cuserName)
 );
+--
 CREATE TABLE  Provider_Branch
 (
-pUserName         INTEGER,
-branchAddress       VARCHAR2(30),
--- P_Branch_Key: Boat Ids are unique.
-CONSTRAINT P_Branch_Key PRIMARY KEY (pUserName,branchAddress)
+pUserName       INTEGER,
+branchAddress   VARCHAR(64),
+CONSTRAINT P_Branch_Key     PRIMARY KEY(pUserName, branchAddress)
+CONSTRAINT P_Branch_FK_1    FOREIGN KEY(pUserName) REFERENCES Provider(pUserName);
 );
 --
 CREATE TABLE  Order_Photos
 (
-orderNo     INTEGER,
-photo       VARCHAR2(30),
--- Order_Photos_Key: A unique photo corresponding to an order is identified by its OrderNo and Photo.
-CONSTRAINT Order_Photos_Key PRIMARY KEY (orderNo,photo),
+orderNo     INT,
+photo       VARCHAR(64),
+CONSTRAINT Order_Photos_Key     PRIMARY KEY(orderNo, photo),
+CONSTRAINT Order_Photos_FK_1    FOREIGN KEY(orderNo) REFERENCES Order(orderNo);
 -- Order_Photos_2R_1: An Order limits maximum of �5� photo uploads.
 --<<CONSTRAINT Order_Photos_2R_1 DOUBT>>
 );
@@ -83,13 +82,13 @@ CONSTRAINT Order_Photos_Key PRIMARY KEY (orderNo,photo),
 --
 --ADDING FOREIGN KEY CONSTRAINTS
 --
-Alter table Provider_Branch
+--Alter table Provider_Branch
 -- P_Branch_FK_1: A Provider_Branch�s P_UserName refers to the pUserName in the Provider relation.
-add CONSTRAINT P_Branch_FK_1 FOREIGN KEY (pUserName) REFERENCES Provider(pUserName);
+-- add CONSTRAINT P_Branch_FK_1 FOREIGN KEY (pUserName) REFERENCES Provider(pUserName);
 
-Alter table Order_Photos
+--Alter table Order_Photos
 -- Order_Photos_FK_1: An Order_Photos�s OrderNo refers to the OrderNo in the Order relation.
-add CONSTRAINT Order_Photos_FK_1 FOREIGN KEY (orderNo) REFERENCES Order(orderNo);
+-- add CONSTRAINT Order_Photos_FK_1 FOREIGN KEY (orderNo) REFERENCES Order(orderNo);
 --
 --
 */
