@@ -94,16 +94,16 @@ revRating   INT NOT NULL,
 revDesc     VARCHAR(256),
 CONSTRAINT Reviews_Key      PRIMARY KEY(cUserName, pUserName),
 CONSTRAINT Reviews_1A_2     CHECK( NOT(revRating < 0 OR revRating > 5) ),
-CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) References Customer(cUserName),
-CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) References Provider(pUserName)
+CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) REFERENCES Customer(cUserName),
+CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
 );
 --
 CREATE TABLE Task_In_Service_Order (
 orderNo     INT,
 taskName    VARCHAR(64),
 CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
-CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) References Service_Order(orderNo),
-CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) References Task(taskName)
+CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
+CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) REFERENCES Task(taskName)
 );
 --
 --
