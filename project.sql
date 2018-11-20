@@ -122,7 +122,16 @@ COMMIT;
 -- --------------------------------------------------------------------
 -- PRINT OUT DATABASE
 -- --------------------------------------------------------------------
--- < One query (per table) of the form: SELECT * FROM table; in order to print out your database >
+SELECT * FROM App_User;
+SELECT * FROM Customer;
+SELECT * FROM Provider;
+SELECT * FROM Provider_Branch;
+SELECT * FROM Service_Order;
+SELECT * FROM Service_Order_Photos;
+SELECT * FROM Task;
+SELECT * FROM Provider_Specialized_Task;
+SELECT * FROM Task_In_Service_Order;
+SELECT * FROM Reviews;
 --
 --
 -- --------------------------------------------------------------------
