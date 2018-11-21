@@ -118,6 +118,26 @@ CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) REFERENCES Customer(cUserName
 CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
 );
 --
+-- Trigger for Constraint Order_Photos_2R_1
+-- author: Team 4
+--
+CREATE OR REPLACE TRIGGER Service_Order_Photos_2R_1
+BEFORE INSERT ON Service_Order_Photos /*Event*/
+FOR EACH ROW
+DECLARE
+numFound INTEGER;
+BEGIN
+SELECT COUNT(*)
+INTO numFound
+FROM Service_Order_Photos S WHERE S.orderNo = :NEW.orderNo group by S.orderNo;
+IF numFound > 5 
+THEN
+RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. '||
+'Order Number '||:NEW.orderNo|| ' cannot allow more than 5 photo uploads');
+END IF;
+END;
+/
+SHOW ERROR
 --
 -- --------------------------------------------------------------------
 -- POPULATE THE TABLES
