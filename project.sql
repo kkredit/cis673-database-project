@@ -46,31 +46,11 @@ CREATE TABLE Provider (
 pUserName   VARCHAR(64) PRIMARY KEY
 );
 --
-CREATE TABLE Service_Order (
-orderNo         INT PRIMARY KEY,
-ocUserName      VARCHAR(64),
-desiredPrice    INT,
-orderDesc       VARCHAR(64) NOT NULL,
-orderLoc        VARCHAR(64) NOT NULL,
-datePosted      DATE,
-bidcloseTime    DATE,
-CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
-);
---
 CREATE TABLE Provider_Branch (
 pUserName       VARCHAR(64),
 branchAddress   VARCHAR(64),
 CONSTRAINT P_Branch_Key     PRIMARY KEY(pUserName, branchAddress),
 CONSTRAINT P_Branch_FK_1    FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
-);
---
-CREATE TABLE Service_Order_Photos (
-orderNo     INT,
-photo       VARCHAR(64),
-CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
-CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
--- Service_Order_Photos_2R_1: An Service_Order limits maximum of 5 photo uploads.
---<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
 );
 --
 CREATE TABLE Task (
@@ -86,6 +66,34 @@ CONSTRAINT P_Specialized_TaskFK_1   FOREIGN KEY(pUserName) REFERENCES Provider(p
 CONSTRAINT P_Specialized_TaskFK_2   FOREIGN KEY(taskName) REFERENCES Task(taskName)
 );
 --
+CREATE TABLE Service_Order (
+orderNo         INT PRIMARY KEY,
+ocUserName      VARCHAR(64),
+desiredPrice    INT,
+orderDesc       VARCHAR(64) NOT NULL,
+orderLoc        VARCHAR(64) NOT NULL,
+datePosted      DATE,
+bidcloseTime    DATE,
+CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
+);
+--
+CREATE TABLE Task_In_Service_Order (
+orderNo     INT,
+taskName    VARCHAR(64),
+CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
+CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
+CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) REFERENCES Task(taskName)
+);
+--
+CREATE TABLE Service_Order_Photos (
+orderNo     INT,
+photo       VARCHAR(64),
+CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
+CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
+-- Service_Order_Photos_2R_1: An Service_Order limits maximum of 5 photo uploads.
+--<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
+);
+--
 CREATE TABLE Reviews (
 cUserName   VARCHAR(64),
 pUserName   VARCHAR(64),
@@ -96,14 +104,6 @@ CONSTRAINT Reviews_Key      PRIMARY KEY(cUserName, pUserName),
 CONSTRAINT Reviews_1A_2     CHECK( NOT(revRating < 0 OR revRating > 5) ),
 CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) REFERENCES Customer(cUserName),
 CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
-);
---
-CREATE TABLE Task_In_Service_Order (
-orderNo     INT,
-taskName    VARCHAR(64),
-CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
-CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
-CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) REFERENCES Task(taskName)
 );
 --
 --
