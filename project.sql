@@ -111,9 +111,6 @@ CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName
 -- POPULATE THE TABLES
 -- --------------------------------------------------------------------
 SET FEEDBACK OFF
--- < The INSERT statements that populate the tables >
--- Important: Keep the number of rows in each table small enough so that the results of your
--- queries can be verified by hand. See the Sailors database as an example.
 --
 INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
@@ -126,7 +123,7 @@ INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Per
 INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal',
                              'I am allergic to dust, so have high standards.' );
 INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
-                             'I manage Sunny Day Apartments on 116th St. Looking for good cleaners.' );
+                             'I manage Sunny Day Apartments on 116th St. Looking for good landscapers.' );
 --
 INSERT INTO Provider VALUES ('BathPros');
 INSERT INTO Provider VALUES ('RWBnGreen');
@@ -144,8 +141,26 @@ INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
 --
+INSERT INTO Service_Order VALUES (1, 'michaelb', NULL, 'Clean my 2 bathrooms each Wednesday',
+                                  '1234 Evans Way, Grand Rapids MI', '19-NOV-18', '05-DEC-18');
+INSERT INTO Service_Order VALUES (2, 'dusty', 50, 'Dust my whole apartment every day',
+                                  '9898 Aurora Ave, Caledonia MI', '19-NOV-18', NULL);
+INSERT INTO Service_Order VALUES (3, 'SarahH', 500, 'Maintain the apartment grounds',
+                                  '7889 116th St, Grand Rapids MI', '20-NOV-18', NULL);
 --
+INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
+INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
+INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
+INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
 --
+INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
+--
+INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
+                            'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
 --
 SET FEEDBACK ON
 COMMIT;
