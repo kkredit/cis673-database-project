@@ -37,7 +37,7 @@ CREATE TABLE Customer (
 cUserName   VARCHAR(64) PRIMARY KEY,
 custAddr    VARCHAR(64) NOT NULL,
 cType       VARCHAR(64) NOT NULL,
-custBio     VARCHAR(256),
+custBio     VARCHAR(64),
 CONSTRAINT Customer_FK1     FOREIGN KEY(cUserName) REFERENCES App_User(userName),
 CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
 );
@@ -46,11 +46,31 @@ CREATE TABLE Provider (
 pUserName   VARCHAR(64) PRIMARY KEY
 );
 --
+CREATE TABLE Service_Order (
+orderNo         INT PRIMARY KEY,
+ocUserName      VARCHAR(64),
+desiredPrice    INT,
+orderDesc       VARCHAR(64) NOT NULL,
+orderLoc        VARCHAR(64) NOT NULL,
+datePosted      DATE,
+bidcloseTime    DATE,
+CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
+);
+--
 CREATE TABLE Provider_Branch (
 pUserName       VARCHAR(64),
 branchAddress   VARCHAR(64),
 CONSTRAINT P_Branch_Key     PRIMARY KEY(pUserName, branchAddress),
 CONSTRAINT P_Branch_FK_1    FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
+);
+--
+CREATE TABLE Service_Order_Photos (
+orderNo     INT,
+photo       VARCHAR(64),
+CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
+CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
+-- Service_Order_Photos_2R_1: An Service_Order limits maximum of 5 photo uploads.
+--<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
 );
 --
 CREATE TABLE Task (
@@ -66,46 +86,6 @@ CONSTRAINT P_Specialized_TaskFK_1   FOREIGN KEY(pUserName) REFERENCES Provider(p
 CONSTRAINT P_Specialized_TaskFK_2   FOREIGN KEY(taskName) REFERENCES Task(taskName)
 );
 --
-CREATE TABLE Service_Order (
-orderNo         INT PRIMARY KEY,
-ocUserName      VARCHAR(64),
-desiredPrice    INT,
-orderDesc       VARCHAR(64) NOT NULL,
-orderLoc        VARCHAR(64) NOT NULL,
-datePosted      DATE,
-bidcloseTime    DATE,
-CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
-);
---
-CREATE TABLE Task_In_Service_Order (
-orderNo     INT,
-taskName    VARCHAR(64),
-CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
-CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
-CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) REFERENCES Task(taskName)
-);
---
-CREATE TABLE Service_Order_Photos (
-orderNo     INT,
-photo       VARCHAR(64),
-CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
-CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
--- Service_Order_Photos_2R_1: An Service_Order limits maximum of 5 photo uploads.
---<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
-);
---
-CREATE TABLE Bid (
-bidDate     DATE,
-orderNo     INT,
-pUserName   VARCHAR(64),
-bidAmt      INT NOT NULL,
-bidWon      CHAR(1) DEFAULT('F'),
-CONSTRAINT Bid_PK       PRIMARY KEY(bidDate, orderNo, pUserName),
-CONSTRAINT Bid_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
-CONSTRAINT Bid_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName),
-CONSTRAINT Bid_1A_1     CHECK( bidWon IN ('T', 'F') )
-);
---
 CREATE TABLE Reviews (
 cUserName   VARCHAR(64),
 pUserName   VARCHAR(64),
@@ -114,67 +94,46 @@ revRating   INT NOT NULL,
 revDesc     VARCHAR(256),
 CONSTRAINT Reviews_Key      PRIMARY KEY(cUserName, pUserName),
 CONSTRAINT Reviews_1A_2     CHECK( NOT(revRating < 0 OR revRating > 5) ),
-CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) REFERENCES Customer(cUserName),
-CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
+CONSTRAINT Reviews_FK_1     FOREIGN KEY(cUserName) References Customer(cUserName),
+CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) References Provider(pUserName)
+);
+--
+CREATE TABLE Task_In_Service_Order (
+orderNo     INT,
+taskName    VARCHAR(64),
+CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
+CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) References Service_Order(orderNo),
+CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) References Task(taskName)
 );
 --
 --
+-- Trigger for Constraint Order_Photos_2R_1
+-- author: Team 4
+--
+CREATE OR REPLACE TRIGGER Service_Order_Photos_2R_1
+BEFORE INSERT ON Service_Order_Photos /*Event*/
+FOR EACH ROW
+DECLARE
+numFound INTEGER;
+BEGIN
+SELECT COUNT(*)
+INTO numFound
+FROM Service_Order_Photos S WHERE S.orderNo = :NEW.orderNo group by S.orderNo;
+IF numFound > 5 
+THEN
+RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. '||
+'Order Number '||:NEW.orderNo|| ' cannot allow more than 5 photo uploads');
+END IF;
+END;
+/
+SHOW ERROR
 -- --------------------------------------------------------------------
 -- POPULATE THE TABLES
 -- --------------------------------------------------------------------
 SET FEEDBACK OFF
---
-INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
-INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
-INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
-INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
-INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
---
-INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
-                             'My name is Mike. I like me house to be clean :)' );
-INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal',
-                             'I am allergic to dust, so have high standards.' );
-INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
-                             'I manage Sunny Day Apartments on 116th St. Looking for good landscapers.' );
---
-INSERT INTO Provider VALUES ('BathPros');
-INSERT INTO Provider VALUES ('RWBnGreen');
---
-INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
-INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
-INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
---
-INSERT INTO Task VALUES ('Dust', 'Clean dust from one or many rooms');
-INSERT INTO Task VALUES ('Mow lawn', 'Cut grass or lawn to a specified length');
-INSERT INTO Task VALUES ('Yard-general', 'Typical landscaping tasks; mowing, weeding, raking');
-INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, shower, floor, mirror');
---
-INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
-INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
-INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
---
-INSERT INTO Service_Order VALUES (1, 'michaelb', NULL, 'Clean my 2 bathrooms each Wednesday',
-                                  '1234 Evans Way, Grand Rapids MI', '19-NOV-18', '05-DEC-18');
-INSERT INTO Service_Order VALUES (2, 'dusty', 50, 'Dust my whole apartment every day',
-                                  '9898 Aurora Ave, Caledonia MI', '19-NOV-18', NULL);
-INSERT INTO Service_Order VALUES (3, 'SarahH', 500, 'Maintain the apartment grounds',
-                                  '7889 116th St, Grand Rapids MI', '20-NOV-18', NULL);
---
-INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
-INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
-INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
-INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
---
-INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
-INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
-INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
-INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
-INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
---
-INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
---
-INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
-                            'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
+-- < The INSERT statements that populate the tables >
+-- Important: Keep the number of rows in each table small enough so that the results of your
+-- queries can be verified by hand. See the Sailors database as an example.
 --
 SET FEEDBACK ON
 COMMIT;
@@ -183,17 +142,7 @@ COMMIT;
 -- --------------------------------------------------------------------
 -- PRINT OUT DATABASE
 -- --------------------------------------------------------------------
-SELECT * FROM App_User;
-SELECT * FROM Customer;
-SELECT * FROM Provider;
-SELECT * FROM Provider_Branch;
-SELECT * FROM Task;
-SELECT * FROM Provider_Specialized_Task;
-SELECT * FROM Service_Order;
-SELECT * FROM Task_In_Service_Order;
-SELECT * FROM Service_Order_Photos;
-SELECT * FROM Bid;
-SELECT * FROM Reviews;
+-- < One query (per table) of the form: SELECT * FROM table; in order to print out your database >
 --
 --
 -- --------------------------------------------------------------------
@@ -218,4 +167,5 @@ SELECT * FROM Reviews;
 --
 --
 COMMIT;
+--
 SPOOL OFF
