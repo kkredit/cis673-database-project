@@ -94,6 +94,18 @@ CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service
 --<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
 );
 --
+CREATE TABLE Bid (
+bidDate     DATE,
+orderNo     INT,
+pUserName   VARCHAR(64),
+bidAmt      INT NOT NULL,
+bidWon      CHAR(1) DEFAULT('F'),
+CONSTRAINT Bid_PK       PRIMARY KEY(bidDate, orderNo, pUserName),
+CONSTRAINT Bid_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
+CONSTRAINT Bid_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName),
+CONSTRAINT Bid_1A_1     CHECK( bidWon IN ('T', 'F') )
+);
+--
 CREATE TABLE Reviews (
 cUserName   VARCHAR(64),
 pUserName   VARCHAR(64),
@@ -158,6 +170,8 @@ INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
+--
+INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
