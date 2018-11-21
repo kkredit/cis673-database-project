@@ -37,7 +37,7 @@ CREATE TABLE Customer (
 cUserName   VARCHAR(64) PRIMARY KEY,
 custAddr    VARCHAR(64) NOT NULL,
 cType       VARCHAR(64) NOT NULL,
-custBio     VARCHAR(64),
+custBio     VARCHAR(256),
 CONSTRAINT Customer_FK1     FOREIGN KEY(cUserName) REFERENCES App_User(userName),
 CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
 );
@@ -115,6 +115,38 @@ SET FEEDBACK OFF
 -- Important: Keep the number of rows in each table small enough so that the results of your
 -- queries can be verified by hand. See the Sailors database as an example.
 --
+INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
+INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
+INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
+INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
+INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
+--
+INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
+                             'My name is Mike. I like me house to be clean :)' );
+INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal',
+                             'I am allergic to dust, so have high standards.' );
+INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
+                             'I manage Sunny Day Apartments on 116th St. Looking for good cleaners.' );
+--
+INSERT INTO Provider VALUES ('BathPros');
+INSERT INTO Provider VALUES ('RWBnGreen');
+--
+INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
+INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
+INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
+--
+INSERT INTO Task VALUES ('Dust', 'Clean dust from one or many rooms');
+INSERT INTO Task VALUES ('Mow lawn', 'Cut grass or lawn to a specified length');
+INSERT INTO Task VALUES ('Yard-general', 'Typical landscaping tasks; mowing, weeding, raking');
+INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, shower, floor, mirror');
+--
+INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
+INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
+INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
+--
+--
+--
+--
 SET FEEDBACK ON
 COMMIT;
 --
@@ -156,5 +188,4 @@ SELECT * FROM Reviews;
 --
 --
 COMMIT;
---
 SPOOL OFF
