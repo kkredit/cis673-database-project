@@ -187,11 +187,12 @@ SELECT * FROM App_User;
 SELECT * FROM Customer;
 SELECT * FROM Provider;
 SELECT * FROM Provider_Branch;
-SELECT * FROM Service_Order;
-SELECT * FROM Service_Order_Photos;
 SELECT * FROM Task;
 SELECT * FROM Provider_Specialized_Task;
+SELECT * FROM Service_Order;
 SELECT * FROM Task_In_Service_Order;
+SELECT * FROM Service_Order_Photos;
+SELECT * FROM Bid;
 SELECT * FROM Reviews;
 --
 --
