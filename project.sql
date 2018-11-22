@@ -150,6 +150,8 @@ INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89
 INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
+INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
+INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.com', 'Customer');
 --
 INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
                              'My name is Mike. I like me house to be clean :)' );
@@ -157,22 +159,30 @@ INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal
                              'I am allergic to dust, so have high standards.' );
 INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
                              'I manage Sunny Day Apartments on 116th St. Looking for good landscapers.' );
+INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Personal',
+                             'Looking for my house windows to be cleaned.' );
 --
 INSERT INTO Provider VALUES ('BathPros');
 INSERT INTO Provider VALUES ('RWBnGreen');
+INSERT INTO Provider VALUES ('MIFFLIN DUNDER');
 --
 INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
 INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
 INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
+INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
 --
 INSERT INTO Task VALUES ('Dust', 'Clean dust from one or many rooms');
 INSERT INTO Task VALUES ('Mow lawn', 'Cut grass or lawn to a specified length');
 INSERT INTO Task VALUES ('Yard-general', 'Typical landscaping tasks; mowing, weeding, raking');
 INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, shower, floor, mirror');
+INSERT INTO Task VALUES ('Window Cleaning', 'Expert bonded and insured window cleaners. Call for a free estimate Interior and Exterior');
+INSERT INTO Task VALUES ('HVAC','Comprehensive air duct cleaning service for every part of the HVAC system');
 --
 INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
+INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'Window Cleaning');
+INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'HVAC');
 --
 INSERT INTO Service_Order VALUES (1, 'michaelb', NULL, 'Clean my 2 bathrooms each Wednesday',
                                   '1234 Evans Way, Grand Rapids MI', '19-NOV-18', '05-DEC-18');
@@ -180,22 +190,30 @@ INSERT INTO Service_Order VALUES (2, 'dusty', 50, 'Dust my whole apartment every
                                   '9898 Aurora Ave, Caledonia MI', '19-NOV-18', NULL);
 INSERT INTO Service_Order VALUES (3, 'SarahH', 500, 'Maintain the apartment grounds',
                                   '7889 116th St, Grand Rapids MI', '20-NOV-18', NULL);
+INSERT INTO Service_Order VALUES (4, 'Cbing', 750, 'Clean the interior and exterior windows of the building',
+                                  '890 Marsh Ridge, Grand Rapids MI', '22-NOV-18', NULL);
 --
 INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
 INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
+INSERT INTO Task_In_Service_Order VALUES (4, 'Window Cleaning');
 --
 INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
+INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 1>');
+INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
 --
 INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
+INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
+INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
+                            'Great work done, windows looks real clean and shining.');
 --
 SET FEEDBACK ON
 COMMIT;
