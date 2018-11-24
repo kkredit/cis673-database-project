@@ -244,8 +244,19 @@ SELECT * FROM Reviews;
 --      (e.g. -- Q25: correlated subquery ).
 --   2. A comment line stating the query in English.
 --   3. The SQL code for the query.
+-- Query 1: Join with atleast 4 table, Find each all users of the app have requested cleaning to be done along with what 
+-- they have requested and and when it was requested
+SELECT DISTINCT A.fullName, C.cType, O.orderLoc, O.datePosted, O.orderDesc, T.taskName
+FROM App_User A, Customer C, Service_Order O, Task_In_Service_Order T
+WHERE A.userName = C.cUserName AND O.ocUserName = C.cUserName AND O.orderNo = T.orderNo;
+-- Query 2: Self Join
 --
---
+-- Query 3a: Union, Intersect and/or Minus (This could be conbined with "8:relational division query"		 
+-- Query 4: Max Query, Finding the highest bid by each company
+SELECT A.fullName, MAX(bidAmt) AS Top_Bid
+FROM Bid B, Provider P, App_User A
+WHERE B.pUserName = P.pUserName AND P.pUserName = A.userName			
+GROUP BY A.fullName;
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
