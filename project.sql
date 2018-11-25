@@ -255,7 +255,13 @@ FROM App_User A, Customer C, Service_Order O, Task_In_Service_Order T
 WHERE A.userName = C.cUserName AND O.ocUserName = C.cUserName AND O.orderNo = T.orderNo;
 -- Query 2: Self Join
 --
--- Query 3: Union, Intersect and/or Minus (This could be conbined with "8:relational division query"		 
+-- Query 3: Minus, Find Providers that have not made any bids
+SELECT pUserName
+FROM Provider
+MINUS
+SELECT pUserName
+FROM Bid;
+--			 
 -- Query 4: Max Query, Finding the highest bid by each company
 SELECT A.fullName, MAX(bidAmt) AS Top_Bid
 FROM Bid B, Provider P, App_User A
@@ -267,7 +273,14 @@ SELECT B.orderNo, COUNT(*)
 FROM bid B
 HAVING COUNT(*) > 1
 GROUP BY B.orderNo
-ORDER BY B.orderNo;			 
+ORDER BY B.orderNo;
+-- Query 6: Correlated Subquery, Find the bids that were greater than the average bids per order
+SELECT B.bidDate, B.pUserName, B.orderNo, B.bidAmt, B.bidWon
+FROM Bid B
+WHERE B.bidAMT > (
+	SELECT AVG(bidAmt)
+	From Bid
+	where orderNo = B.orderNo);
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
