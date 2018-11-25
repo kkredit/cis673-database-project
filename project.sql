@@ -218,6 +218,8 @@ INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
 INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
                             'Great work done, windows looks real clean and shining.');
+INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
+			    'They were nice, but the one guy kept pranking the other so he stormed out.');
 --
 SET FEEDBACK ON
 COMMIT;
@@ -281,6 +283,24 @@ WHERE B.bidAMT > (
 	SELECT AVG(bidAmt)
 	From Bid
 	where orderNo = B.orderNo);
+-- Query 7: Non-correlated subquery, Find providers who do not have any reviews
+SELECT P.pUserName
+FROM Provider P
+WHERE P.pUserName NOT IN (SELECT R.pUserName
+			  FROM Reviews R);
+-- Query 8: Relational Divison Query
+--
+-- Query 9: Outer Join	
+-- Query 10: Rank Query, Find the rank of 4 in the reviews table
+SELECT RANK (2) WITHIN GROUP
+(ORDER BY revRating DESC) "Rank of rating 2"
+FROM Reviews;
+--Query 10: Top-N query, Find the 3 highest bids
+SELECT orderNo, pUserName, bidAmt, bidWon
+FROM (SELECT orderNo, pUserName, bidAmt, bidWon
+      FROM Bid
+      ORDER BY bidAmt DESC)
+WHERE ROWNUM < 4;		
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
