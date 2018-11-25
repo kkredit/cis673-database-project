@@ -208,7 +208,11 @@ INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 1>');
 INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
 --
 INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
+INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 650, 'F');			 
 INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
+INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'F');
+INSERT INTO Bid VALUES ('26-NOV-18', 2, 'RWBnGreen', 80, 'F');
+INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'T');			 
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
@@ -251,12 +255,19 @@ FROM App_User A, Customer C, Service_Order O, Task_In_Service_Order T
 WHERE A.userName = C.cUserName AND O.ocUserName = C.cUserName AND O.orderNo = T.orderNo;
 -- Query 2: Self Join
 --
--- Query 3a: Union, Intersect and/or Minus (This could be conbined with "8:relational division query"		 
+-- Query 3: Union, Intersect and/or Minus (This could be conbined with "8:relational division query"		 
 -- Query 4: Max Query, Finding the highest bid by each company
 SELECT A.fullName, MAX(bidAmt) AS Top_Bid
 FROM Bid B, Provider P, App_User A
 WHERE B.pUserName = P.pUserName AND P.pUserName = A.userName			
 GROUP BY A.fullName;
+--
+-- Query 5: Group By, having, order by, Find the order numbers which have more than one bids on them
+SELECT B.orderNo, COUNT(*)
+FROM bid B
+HAVING COUNT(*) > 1
+GROUP BY B.orderNo
+ORDER BY B.orderNo;			 
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
