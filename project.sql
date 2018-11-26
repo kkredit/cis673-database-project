@@ -325,6 +325,16 @@ WHERE ROWNUM < 4;
 --   1. A comment line stating: Testing: < IC name >
 --   2. A SQL 'INSERT', 'DELETE', or 'UPDATE' that will test the IC
 --
+-- Testing: 
+--
+-- Testing: 
+--
+-- Testing: 
+--
+-- Testing: 
+--
+-- Testing: 
+--
 --
 COMMIT;
 SPOOL OFF
