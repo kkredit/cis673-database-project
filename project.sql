@@ -254,7 +254,7 @@ WHERE A.userName = C.cUserName AND
       O.orderNo = T.orderNo;
 --
 -- Query 2: A self-join
---  --> 
+--  --> CLAIMED BY KEVIN
 --
 -- Query 3: UNION, INTERSECT, and/or MINUS
 --  --> MINUS: Find Providers that have not made any bids
@@ -326,6 +326,7 @@ WHERE ROWNUM < 4;
 --   2. A SQL 'INSERT', 'DELETE', or 'UPDATE' that will test the IC
 --
 -- Testing: 
+--  --> CLAIMED BY KEVIN
 --
 -- Testing: 
 --
