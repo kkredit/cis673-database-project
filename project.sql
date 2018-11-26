@@ -43,7 +43,8 @@ CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
 );
 --
 CREATE TABLE Provider (
-pUserName   VARCHAR(64) PRIMARY KEY
+pUserName   VARCHAR(64) PRIMARY KEY,
+pDesc       VARCHAR(64) NOT NULL
 );
 --
 CREATE TABLE Provider_Branch (
@@ -161,9 +162,9 @@ INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Profes
 INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Personal',
                              'Looking for my house windows to be cleaned.' );
 --
-INSERT INTO Provider VALUES ('BathPros');
-INSERT INTO Provider VALUES ('RWBnGreen');
-INSERT INTO Provider VALUES ('MIFFLIN DUNDER');
+INSERT INTO Provider VALUES ('BathPros', 'We are the best in the biz of wiz!');
+INSERT INTO Provider VALUES ('RWBnGreen', 'We make your green show off some Red, White, and Blue.');
+INSERT INTO Provider VALUES ('MIFFLIN DUNDER', 'Helping you get your Scrant on since 2005');
 --
 INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
 INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
