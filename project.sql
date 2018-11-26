@@ -90,8 +90,7 @@ orderNo     INT,
 photo       VARCHAR(64),
 CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
 CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
--- Service_Order_Photos_2R_1: An Service_Order limits maximum of 5 photo uploads.
---<<CONSTRAINT Service_Order_Photos_2R_1 DOUBT>>
+-- Service_Order_Photos_2R_1: See trigger below
 );
 --
 CREATE TABLE Bid (
@@ -119,23 +118,23 @@ CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName
 );
 --
 -- Trigger for Constraint Order_Photos_2R_1
--- author: Team 4
---
 CREATE OR REPLACE TRIGGER Service_Order_Photos_2R_1
-BEFORE INSERT ON Service_Order_Photos /*Event*/
+BEFORE INSERT ON Service_Order_Photos
 FOR EACH ROW
--- WHEN (NEW.orderNo is not null)
-	DECLARE
-		numFound INTEGER;
+DECLARE
+    numFound INTEGER;
 BEGIN
-	SELECT MAX(COUNT(*))
-	INTO numFound
-	FROM Service_Order_Photos S where s.orderNo = :NEW.orderNo group by S.orderNo having COUNT(*) > 1;
+    SELECT MAX(COUNT(*)) INTO numFound
+    FROM Service_Order_Photos S
+    WHERE s.orderNo = :NEW.orderNo
+    GROUP BY S.orderNo
+    HAVING COUNT(*) > 1;
 --
-	IF numFound > 4 
-	THEN
-		RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. Order Number '||:NEW.orderNo||' cannot allow more than 5 photo uploads');
-	END IF;
+    IF numFound > 4
+    THEN
+        RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. Order Number '||
+                                :NEW.orderNo||' cannot allow more than 5 photo uploads');
+    END IF;
 END;
 /
 SHOW ERROR
@@ -148,10 +147,10 @@ SET FEEDBACK OFF
 INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
+INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.com', 'Customer');
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
-INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.com', 'Customer');
 --
 INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
                              'My name is Mike. I like me house to be clean :)' );
@@ -208,18 +207,18 @@ INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 1>');
 INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
 --
 INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
-INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 650, 'F');			 
+INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 650, 'F');
 INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
 INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'F');
 INSERT INTO Bid VALUES ('26-NOV-18', 2, 'RWBnGreen', 80, 'F');
-INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'T');			 
+INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'T');
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
 INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
                             'Great work done, windows looks real clean and shining.');
 INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
-			    'They were nice, but the one guy kept pranking the other so he stormed out.');
+                            'They were nice, but the one guy kept pranking the other so he stormed out.');
 --
 SET FEEDBACK ON
 COMMIT;
@@ -244,63 +243,78 @@ SELECT * FROM Reviews;
 -- --------------------------------------------------------------------
 -- EXECUTE QUERIES
 -- --------------------------------------------------------------------
--- < The SQL queries >
--- Include the following for each query:
---   1. A comment line stating the query number and the feature(s) it demonstrates
---      (e.g. -- Q25: correlated subquery ).
---   2. A comment line stating the query in English.
---   3. The SQL code for the query.
--- Query 1: Join with atleast 4 table, Find each all users of the app have requested cleaning to be done along with what 
--- they have requested and and when it was requested
+-- Query 1: A join involving at least four relations.
+--  --> Find all users of the app that have requested cleaning to be done along with what they have
+--      requested and when it was requested
 SELECT DISTINCT A.fullName, C.cType, O.orderLoc, O.datePosted, O.orderDesc, T.taskName
 FROM App_User A, Customer C, Service_Order O, Task_In_Service_Order T
-WHERE A.userName = C.cUserName AND O.ocUserName = C.cUserName AND O.orderNo = T.orderNo;
--- Query 2: Self Join
+WHERE A.userName = C.cUserName AND
+      O.ocUserName = C.cUserName AND
+      O.orderNo = T.orderNo;
 --
--- Query 3: Minus, Find Providers that have not made any bids
+-- Query 2: A self-join
+--  --> 
+--
+-- Query 3: UNION, INTERSECT, and/or MINUS
+--  --> MINUS: Find Providers that have not made any bids
 SELECT pUserName
 FROM Provider
 MINUS
 SELECT pUserName
 FROM Bid;
---			 
--- Query 4: Max Query, Finding the highest bid by each company
+--
+-- Query 4: SUM, AVG, MAX, and/or MIN
+--  --> MAX: Find the highest bid by each company
 SELECT A.fullName, MAX(bidAmt) AS Top_Bid
 FROM Bid B, Provider P, App_User A
-WHERE B.pUserName = P.pUserName AND P.pUserName = A.userName			
+WHERE B.pUserName = P.pUserName AND
+      P.pUserName = A.userName
 GROUP BY A.fullName;
 --
--- Query 5: Group By, having, order by, Find the order numbers which have more than one bids on them
+-- Query 5: GROUP BY, HAVING, and ORDER BY, all appearing in the same query
+--  --> Find the order numbers which have more than one bid on them
 SELECT B.orderNo, COUNT(*)
-FROM bid B
+FROM Bid B
 HAVING COUNT(*) > 1
 GROUP BY B.orderNo
 ORDER BY B.orderNo;
--- Query 6: Correlated Subquery, Find the bids that were greater than the average bids per order
+--
+-- Query 6: A correlated subquery
+--  --> Find the bids that were greater than the average bid per order
 SELECT B.bidDate, B.pUserName, B.orderNo, B.bidAmt, B.bidWon
 FROM Bid B
-WHERE B.bidAMT > (
-	SELECT AVG(bidAmt)
-	From Bid
-	where orderNo = B.orderNo);
--- Query 7: Non-correlated subquery, Find providers who do not have any reviews
+WHERE B.bidAMT > (SELECT AVG(bidAmt)
+                  FROM Bid
+                  WHERE orderNo = B.orderNo);
+--
+-- Query 7: A non-correlated subquery
+--  --> Find providers who do not have any reviews
 SELECT P.pUserName
 FROM Provider P
 WHERE P.pUserName NOT IN (SELECT R.pUserName
-			  FROM Reviews R);
--- Query 8: Relational Divison Query
+                          FROM Reviews R);
 --
--- Query 9: Outer Join	
--- Query 10: Rank Query, Find the rank of 4 in the reviews table
+-- Query 8: A relational DIVISION query
+--  --> 
+--
+-- Query 9: An outer join
+--  --> 
+--
+-- Query 10: A RANK query
+--  --> Find the rank of 2 in the reviews table
 SELECT RANK (2) WITHIN GROUP
 (ORDER BY revRating DESC) "Rank of rating 2"
 FROM Reviews;
---Query 10: Top-N query, Find the 3 highest bids
+--
+-- Query 11: A Top-N query
+--  --> Find the 3 highest bids
 SELECT orderNo, pUserName, bidAmt, bidWon
 FROM (SELECT orderNo, pUserName, bidAmt, bidWon
       FROM Bid
       ORDER BY bidAmt DESC)
-WHERE ROWNUM < 4;		
+WHERE ROWNUM < 4;
+--
+--
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
