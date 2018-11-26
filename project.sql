@@ -148,6 +148,7 @@ SET FEEDBACK OFF
 INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
+INSERT INTO App_User VALUES ('CatLady', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
 INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.com', 'Customer');
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
@@ -159,6 +160,8 @@ INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal
                              'I am allergic to dust, so have high standards.' );
 INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
                              'I manage Sunny Day Apartments on 116th St. Looking for good landscapers.' );
+INSERT INTO Customer VALUES ('CatLady', '7889 116th St, Grand Rapids MI', 'Personal',
+                             'I have many cats. Need hair and dust removed regularly.' );
 INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Personal',
                              'Looking for my house windows to be cleaned.' );
 --
@@ -192,6 +195,8 @@ INSERT INTO Service_Order VALUES (3, 'SarahH', 500, 'Maintain the apartment grou
                                   '7889 116th St, Grand Rapids MI', '20-NOV-18', NULL);
 INSERT INTO Service_Order VALUES (4, 'Cbing', 750, 'Clean the interior and exterior windows of the building',
                                   '890 Marsh Ridge, Grand Rapids MI', '22-NOV-18', NULL);
+INSERT INTO Service_Order VALUES (5, 'CatLady', 75, 'Clean my apartment from the cats',
+                                  '7889 116th St, Apt A, Grand Rapids MI', '26-NOV-18', NULL);
 --
 INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
 INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
@@ -254,7 +259,15 @@ WHERE A.userName = C.cUserName AND
       O.orderNo = T.orderNo;
 --
 -- Query 2: A self-join
---  --> CLAIMED BY KEVIN
+--  --> Find all email accounts associated with both 'Professional' and 'Personal' accounts
+SELECT U1.email, C1.cUserName AS ProfessionalAccount, C2.cUserName AS PersonalAccount
+FROM Customer C1, Customer C2, App_User U1, App_User U2
+WHERE C1.cUserName = U1.userName AND
+      C2.cUserName = U2.userName AND
+      C1.cType = 'Professional' AND
+      C2.cType = 'Personal' AND
+      U1.email = U2.email;
+PAUSE;
 --
 -- Query 3: UNION, INTERSECT, and/or MINUS
 --  --> MINUS: Find Providers that have not made any bids
