@@ -1,6 +1,6 @@
 SPOOL project.out
-WHENEVER SQLERROR EXIT FAILURE
 SET ECHO ON
+WHENEVER SQLERROR EXIT FAILURE
 --
 /*
 CIS 673 - Database Design Project
@@ -268,7 +268,6 @@ WHERE C1.cUserName = U1.userName AND
       C1.cType = 'Professional' AND
       C2.cType = 'Personal' AND
       U1.email = U2.email;
-PAUSE;
 --
 -- Query 3: UNION, INTERSECT, and/or MINUS
 --  --> MINUS: Find Providers that have not made any bids
