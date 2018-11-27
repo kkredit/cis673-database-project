@@ -343,7 +343,9 @@ INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 --  --> Note that no App_User with this username exist
 INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
 --
--- Testing: 
+-- Testing: User_1A_2
+--  --> 
+INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
 --
 -- Testing: 
 --
