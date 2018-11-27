@@ -339,8 +339,8 @@ WHERE ROWNUM < 4;
 --   1. A comment line stating: Testing: < IC name >
 --   2. A SQL 'INSERT', 'DELETE', or 'UPDATE' that will test the IC
 --
--- Testing: 
---  --> CLAIMED BY KEVIN
+-- Testing: Bid_Key
+INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 --
 -- Testing: 
 --
