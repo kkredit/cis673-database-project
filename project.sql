@@ -333,11 +333,7 @@ WHERE ROWNUM < 4;
 -- --------------------------------------------------------------------
 -- TEST INTEGRITY CONSTRAINTS
 -- --------------------------------------------------------------------
--- < The insert/delete/update statements to test the enforcement of ICs >
--- Include the following items for every IC that you test (Important: see the next section titled
--- "Submit your proposal" regarding which ICs to test).
---   1. A comment line stating: Testing: < IC name >
---   2. A SQL 'INSERT', 'DELETE', or 'UPDATE' that will test the IC
+WHENEVER SQLERROR CONTINUE
 --
 -- Testing: Bid_Key
 INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
