@@ -209,6 +209,7 @@ INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 5>');
 INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 1>');
 INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
 --
@@ -347,7 +348,9 @@ WHERE ROWNUM < 4;
 --
 -- Testing: 
 --
--- Testing: 
+-- Testing: Service_Order_Photos_2R_1
+--  --> Note that during table creation, Service_Order 3 already had 5 photos added
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 6>');
 --
 --
 COMMIT;
