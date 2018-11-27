@@ -44,7 +44,8 @@ CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
 --
 CREATE TABLE Provider (
 pUserName   VARCHAR(64) PRIMARY KEY,
-pDesc       VARCHAR(64) NOT NULL
+pDesc       VARCHAR(64) NOT NULL,
+CONSTRAINT  Provider_FK_1   FOREIGN KEY(pUserName) REFERENCES App_User(userName)
 );
 --
 CREATE TABLE Provider_Branch (
@@ -338,7 +339,9 @@ WHENEVER SQLERROR CONTINUE
 --  --> Note that during table creation, this same bid was entered, but with a bidAmt of 650
 INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 --
--- Testing: 
+-- Testing: Provider_FK_1
+--  --> Note that no App_User with this username exist
+INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
 --
 -- Testing: 
 --
