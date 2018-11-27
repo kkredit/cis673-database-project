@@ -334,7 +334,7 @@ WHERE ROWNUM < 4;
 -- --------------------------------------------------------------------
 WHENEVER SQLERROR CONTINUE
 --
--- Testing: Bid_Key
+-- Testing: Bid_PK
 --  --> Note that during table creation, this same bid was entered, but with a bidAmt of 650
 INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 --
