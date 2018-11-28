@@ -154,6 +154,7 @@ INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.c
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
+INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer');                     
 --
 INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
                              'My name is Mike. I like me house to be clean :)' );
@@ -165,6 +166,8 @@ INSERT INTO Customer VALUES ('CatLady', '7889 116th St, Grand Rapids MI', 'Perso
                              'I have many cats. Need hair and dust removed regularly.' );
 INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Personal',
                              'Looking for my house windows to be cleaned.' );
+INSERT INTO Customer VALUES ('ASkywalker', '6736 Jedi Path, Lansing MI', 'Personal',
+                             'I do not like sand, it is course, rough, irritating, and it gets everywhere.');
 --
 INSERT INTO Provider VALUES ('BathPros', 'We are the best in the biz of wiz!');
 INSERT INTO Provider VALUES ('RWBnGreen', 'We make your green show off some Red, White, and Blue.');
@@ -198,6 +201,8 @@ INSERT INTO Service_Order VALUES (4, 'Cbing', 750, 'Clean the interior and exter
                                   '890 Marsh Ridge, Grand Rapids MI', '22-NOV-18', NULL);
 INSERT INTO Service_Order VALUES (5, 'CatLady', 75, 'Clean my apartment from the cats',
                                   '7889 116th St, Apt A, Grand Rapids MI', '26-NOV-18', NULL);
+INSERT INTO Service_Order VALUES (6, 'SarahH', 1300, 'Clean a recently vacated apartment',
+                                  '7889 116th St, Apt 5B, Grand Rapids MI', '29-NOV-18', NULL);
 --
 INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
 INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
@@ -313,7 +318,11 @@ WHERE P.pUserName NOT IN (SELECT R.pUserName
 --  --> 
 --
 -- Query 9: An outer join
---  --> 
+--  --> Find orders by customer, whether they have orders or not
+SELECT C.cUserName, C.cType, O.orderNo
+FROM Customer C LEFT OUTER JOIN Service_Order O
+    ON C.cUserName = O.ocUserName
+ORDER BY C.cUserName;
 --
 -- Query 10: A RANK query
 --  --> Find the rank of 2 in the reviews table
