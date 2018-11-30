@@ -240,12 +240,12 @@ INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
 INSERT INTO Task_In_Service_Order VALUES (4, 'Window Cleaning');
-INSERT INTO Task_In_Service_Order VALUES (4, 'Dust')
-INSERT INTO Task_In_Service_Order VALUES (5, 'Dust')
-INSERT INTO Task_In_Service_Order VALUES (6, 'Window Cleaning')
-INSERT INTO Task_In_Service_Order VALUES (6, 'Dust')
-INSERT INTO Task_In_Service_Order VALUES (6, 'Bathroom-general')  
-INSERT INTO Task_In_Service_Order VALUES (7, 'Dust')                     
+INSERT INTO Task_In_Service_Order VALUES (4, 'Dust');
+INSERT INTO Task_In_Service_Order VALUES (5, 'Dust');
+INSERT INTO Task_In_Service_Order VALUES (6, 'Window Cleaning');
+INSERT INTO Task_In_Service_Order VALUES (6, 'Dust');
+INSERT INTO Task_In_Service_Order VALUES (6, 'Bathroom-general');
+INSERT INTO Task_In_Service_Order VALUES (7, 'Dust');
 --
 INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
@@ -389,17 +389,16 @@ WHENEVER SQLERROR CONTINUE
 INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 --
 -- Testing: Provider_FK_1
---  --> Note that no App_User with this username exist
+--  --> Note that no App_User with this username exists
 INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
 --
--- Testing: User_1A_2
---  --> Note that a user needs to enter if they are a customer or provider.
-INSERT INTO App_User VALUES ('Minto League', 'ASH', 2273577889, 'corporatesales@pokemon.com', 'gymtrainer');
+-- Testing: App_User_1A_2
+--  --> Note that a user needs to enter if they are a Customer or Provider
+INSERT INTO App_User VALUES ('Minto League', 'ASH', 2273577889, 'corporatesales@pokemon.com', 'Trainer');
 --
--- Test
--- Testing: User_2A_1
---  --> Note that a user must atleast have a phone or email for registration
- INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');                     
+-- Testing: App_User_2A_1
+--  --> Note that a user must at least have a phone or email for registration
+INSERT INTO App_User VALUES ('GoCleaners', 'John Doe', NULL, NULL, 'Provider');
 --
 -- Testing: Service_Order_Photos_2R_1
 --  --> Note that during table creation, Service_Order 3 already had 5 photos added
