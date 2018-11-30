@@ -388,7 +388,10 @@ INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related mes
 --  --> Note that a user needs to enter if they are a customer or provider.
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
 --
--- Testing: 
+-- Testing: User_2A_1
+--  --> Note that a user must atleast have a phone or email for registration
+INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');
+-- 
 --
 -- Testing: Service_Order_Photos_2R_1
 --  --> Note that during table creation, Service_Order 3 already had 5 photos added
