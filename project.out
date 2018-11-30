@@ -1,0 +1,1003 @@
+SQL> WHENEVER SQLERROR EXIT FAILURE
+SQL> --
+SQL> /*
+SQL> CIS 673 - Database Design Project
+SQL> Team 4:
+SQL> - Akshay Kumar Khandgonda
+SQL> - Kevin Kredit
+SQL> - Vineet James
+SQL> - Sanil Apte
+SQL> - Brian Mbeere
+SQL> */
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- CLEAN UP LAST RUN
+SQL> -- --------------------------------------------------------------------
+SQL> SET ECHO OFF
+
+PL/SQL procedure successfully completed.
+
+SQL> --
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- CREATE THE TABLES
+SQL> -- --------------------------------------------------------------------
+SQL> CREATE TABLE App_User (
+  2  userName	 VARCHAR(15) PRIMARY KEY,
+  3  fullName	 VARCHAR(20) NOT NULL,
+  4  phone	 INTEGER,
+  5  email	 VARCHAR(30),
+  6  userType	 VARCHAR(9),
+  7  CONSTRAINT App_User_1A_2	  CHECK (userType IN ('Customer', 'Provider')),
+  8  CONSTRAINT App_User_2A_1	  CHECK (NOT (phone is NULL AND email is NULL))
+  9  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Customer (
+  2  cUserName	 VARCHAR(15) PRIMARY KEY,
+  3  custAddr	 VARCHAR(40) NOT NULL,
+  4  cType	 VARCHAR(12) NOT NULL,
+  5  custBio	 VARCHAR(256),
+  6  CONSTRAINT Customer_FK1	 FOREIGN KEY(cUserName) REFERENCES App_User(userName),
+  7  CONSTRAINT Customer_1A_2	 CHECK(cType IN('Professional', 'Personal'))
+  8  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Provider (
+  2  pUserName	 VARCHAR(15) PRIMARY KEY,
+  3  pDesc	 VARCHAR(64) NOT NULL,
+  4  CONSTRAINT  Provider_FK_1	 FOREIGN KEY(pUserName) REFERENCES App_User(userName)
+  5  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Provider_Branch (
+  2  pUserName	     VARCHAR(15),
+  3  branchAddress   VARCHAR(40),
+  4  CONSTRAINT P_Branch_Key	 PRIMARY KEY(pUserName, branchAddress),
+  5  CONSTRAINT P_Branch_FK_1	 FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
+  6  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Task (
+  2  taskName	 VARCHAR(20) PRIMARY KEY,
+  3  taskDesc	 VARCHAR(256) NOT NULL
+  4  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Provider_Specialized_Task (
+  2  pUserName	 VARCHAR(15),
+  3  taskName	 VARCHAR(20),
+  4  CONSTRAINT P_Specialized_TaskKey	 PRIMARY KEY(pUserName, taskName),
+  5  CONSTRAINT P_Specialized_TaskFK_1	 FOREIGN KEY(pUserName) REFERENCES Provider(pUserName),
+  6  CONSTRAINT P_Specialized_TaskFK_2	 FOREIGN KEY(taskName) REFERENCES Task(taskName)
+  7  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Service_Order (
+  2  orderNo	     INT PRIMARY KEY,
+  3  ocUserName      VARCHAR(15),
+  4  desiredPrice    INT,
+  5  orderDesc	     VARCHAR(64) NOT NULL,
+  6  orderLoc	     VARCHAR(40) NOT NULL,
+  7  datePosted      DATE,
+  8  bidCloseTime    DATE,
+  9  CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
+ 10  -- Service_Order_2R_2: See trigger below
+ 11  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Task_In_Service_Order (
+  2  orderNo	 INT,
+  3  taskName	 VARCHAR(20),
+  4  CONSTRAINT TaskService_OrderKey	  PRIMARY KEY(orderNo, taskName),
+  5  CONSTRAINT TaskService_Order_FK_1	  FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
+  6  CONSTRAINT TaskService_Order_FK_2	  FOREIGN KEY(taskName) REFERENCES Task(taskName)
+  7  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Service_Order_Photos (
+  2  orderNo	 INT,
+  3  photo	 VARCHAR(64),
+  4  CONSTRAINT Service_Order_Photos_Key      PRIMARY KEY(orderNo, photo),
+  5  CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo)
+  6  -- Service_Order_Photos_2R_1: See trigger below
+  7  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Bid (
+  2  bidDate	 DATE,
+  3  orderNo	 INT,
+  4  pUserName	 VARCHAR(15),
+  5  bidAmt	 INT NOT NULL,
+  6  bidWon	 CHAR(1) DEFAULT('F'),
+  7  CONSTRAINT Bid_PK	     PRIMARY KEY(bidDate, orderNo, pUserName),
+  8  CONSTRAINT Bid_FK_1     FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
+  9  CONSTRAINT Bid_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName),
+ 10  CONSTRAINT Bid_1A_1     CHECK( bidWon IN ('T', 'F') )
+ 11  );
+
+Table created.
+
+SQL> --
+SQL> CREATE TABLE Reviews (
+  2  cUserName	 VARCHAR(15),
+  3  pUserName	 VARCHAR(15),
+  4  revDate	 DATE NOT NULL,
+  5  revRating	 INT NOT NULL,
+  6  revDesc	 VARCHAR(256),
+  7  CONSTRAINT Reviews_Key	 PRIMARY KEY(cUserName, pUserName),
+  8  CONSTRAINT Reviews_1A_2	 CHECK( NOT(revRating < 0 OR revRating > 5) ),
+  9  CONSTRAINT Reviews_FK_1	 FOREIGN KEY(cUserName) REFERENCES Customer(cUserName),
+ 10  CONSTRAINT Reviews_FK_2	 FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
+ 11  );
+
+Table created.
+
+SQL> --
+SQL> -- Trigger for Constraint Order_Photos_2R_1
+SQL> CREATE OR REPLACE TRIGGER Service_Order_Photos_2R_1
+  2  BEFORE INSERT OR UPDATE ON Service_Order_Photos
+  3  FOR EACH ROW
+  4  DECLARE
+  5  	 numFound INTEGER;
+  6  BEGIN
+  7  	 SELECT MAX(COUNT(*)) INTO numFound
+  8  	 FROM Service_Order_Photos S
+  9  	 WHERE s.orderNo = :NEW.orderNo
+ 10  	 GROUP BY S.orderNo
+ 11  	 HAVING COUNT(*) > 1;
+ 12  --
+ 13  	 IF numFound > 4
+ 14  	 THEN
+ 15  	     RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. Order Number '||
+ 16  				     :NEW.orderNo||' cannot allow more than 5 photo uploads');
+ 17  	 END IF;
+ 18  END;
+ 19  /
+
+Trigger created.
+
+SQL> --
+SQL> -- Trigger for Constraint Service_Order_2R_2
+SQL> --  --> NOTE: this trigger is EXTRA and does not currently work
+SQL> CREATE OR REPLACE TRIGGER Service_Order_2R_2
+  2  BEFORE INSERT OR UPDATE ON Service_Order
+  3  FOR EACH ROW
+  4  BEGIN
+  5  	 IF TRUNC(SYSDATE-10) > :NEW.bidCloseTime
+  6  	 THEN
+  7  	     RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. Order date is in the past');
+  8  	 END IF;
+  9  END;
+ 10  /
+
+Trigger created.
+
+SQL> ALTER TRIGGER Service_Order_2R_2 DISABLE;
+
+Trigger altered.
+
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- POPULATE THE TABLES
+SQL> -- --------------------------------------------------------------------
+SQL> SET FEEDBACK OFF
+SQL> --
+SQL> INSERT INTO App_User VALUES ('michaelb', 'Michael Benson', 6164254849, 'mbenson@madeup.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('dusty', 'Dustin Van Dyke', 6168893456, 'dustinvd89@madeup.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('SarahH', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('CatLady', 'Sarah Han', 5355678409, 'hansarah@madeup.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
+SQL> INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
+SQL> INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
+SQL> INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('JaneB', 'Jane Bikoko', 6328925723, 'janeb@lmail.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('Danielk', 'Daniel Kioko', 5938205825, 'danik@pmail.com', 'Customer');
+SQL> INSERT INTO App_User VALUES ('CarpetSweep', 'Arnold Rust', 3856412540, 'arnorf@carpetsweep.com', 'Provider');
+SQL> INSERT INTO App_User VALUES ('InteriorDecor', 'Donna Mary', 3860153863, 'donm@interiordecor.com', 'Provider');
+SQL> --
+SQL> INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
+  2  				  'My name is Mike. I like me house to be clean :)' );
+SQL> INSERT INTO Customer VALUES ('dusty', '9898 Aurora Ave, Caledonia MI', 'Personal',
+  2  				  'I am allergic to dust, so have high standards.' );
+SQL> INSERT INTO Customer VALUES ('SarahH', '7889 116th St, Grand Rapids MI', 'Professional',
+  2  				  'I manage Sunny Day Apartments on 116th St. Looking for good landscapers.' );
+SQL> INSERT INTO Customer VALUES ('CatLady', '7889 116th St, Grand Rapids MI', 'Personal',
+  2  				  'I have many cats. Need hair and dust removed regularly.' );
+SQL> INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Personal',
+  2  				  'Looking for my house windows to be cleaned.' );
+SQL> INSERT INTO Customer VALUES ('ASkywalker', '6736 Jedi Path, Lansing MI', 'Personal',
+  2  				  'I do not like sand, it is course, rough, irritating, and it gets everywhere.');
+SQL> INSERT INTO Customer VALUES ('JaneB', '2146 L Michigan Dr , Grand Rapids MI', 'Professional',
+  2  				  'Pet Health Vetinary is searching for a dedicated cleaning company');
+SQL> INSERT INTO Customer VALUES ('Danielk', '5234 South Haven Dr, Kentwood MI', 'Personal',
+  2  				  'I have a set of couches that need detailing');
+SQL> --
+SQL> INSERT INTO Provider VALUES ('BathPros', 'We are the best in the biz of wiz!');
+SQL> INSERT INTO Provider VALUES ('RWBnGreen', 'We make your green show off some Red, White, and Blue.');
+SQL> INSERT INTO Provider VALUES ('MIFFLIN DUNDER', 'Helping you get your Scrant on since 2005');
+SQL> INSERT INTO Provider VALUES ('CarpetSweep', 'One stop shop for all your carpet cleaning needs');
+SQL> INSERT INTO Provider VALUES ('InteriorDecor', 'Turning homes into palaces');
+SQL> --
+SQL> INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
+SQL> INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
+SQL> INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
+SQL> INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
+SQL> INSERT INTO Provider_Branch VALUES ('CarpetSweep', '4396 Burton Street , Muskegon MI');
+SQL> INSERT INTO Provider_Branch VALUES ('InteriorDecor', '2956 L Michigan Dr, Grand Rapids MI');
+SQL> --
+SQL> INSERT INTO Task VALUES ('Dust', 'Clean dust from one or many rooms');
+SQL> INSERT INTO Task VALUES ('Mow lawn', 'Cut grass or lawn to a specified length');
+SQL> INSERT INTO Task VALUES ('Yard-general', 'Typical landscaping tasks; mowing, weeding, raking');
+SQL> INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, shower, floor, mirror');
+SQL> INSERT INTO Task VALUES ('Window Cleaning', 'Expert bonded and insured window cleaners. Call for a free estimate Interior and Exterior');
+SQL> INSERT INTO Task VALUES ('HVAC','Comprehensive air duct cleaning service for every part of the HVAC system');
+SQL> INSERT INTO Task VALUES ('CarpetCleaning','Carpet cleaning for both indoor and out corridors');
+SQL> --
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'Window Cleaning');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'HVAC');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('CarpetSweep', 'CarpetCleaning');
+SQL> INSERT INTO Provider_Specialized_Task VALUES ('InteriorDecor', 'Dust');
+SQL> --
+SQL> INSERT INTO Service_Order VALUES (1, 'michaelb', NULL, 'Clean my 2 bathrooms each Wednesday',
+  2  				       '1234 Evans Way, Grand Rapids MI', '19-NOV-18', '05-DEC-18');
+SQL> INSERT INTO Service_Order VALUES (2, 'dusty', 50, 'Dust my whole apartment every day',
+  2  				       '9898 Aurora Ave, Caledonia MI', '19-NOV-18', NULL);
+SQL> INSERT INTO Service_Order VALUES (3, 'SarahH', 500, 'Maintain the apartment grounds',
+  2  				       '7889 116th St, Grand Rapids MI', '20-NOV-18', NULL);
+SQL> INSERT INTO Service_Order VALUES (4, 'Cbing', 750, 'Clean the interior and exterior windows of the building',
+  2  				       '890 Marsh Ridge, Grand Rapids MI', '22-NOV-18', NULL);
+SQL> INSERT INTO Service_Order VALUES (5, 'CatLady', 75, 'Clean my apartment from the cats',
+  2  				       '7889 116th St, Apt A, Grand Rapids MI', '26-NOV-18', NULL);
+SQL> INSERT INTO Service_Order VALUES (6, 'SarahH', 1300, 'Clean a recently vacated apartment',
+  2  				       '7889 116th St, Apt 5B, Grand Rapids MI', '29-NOV-18', NULL);
+SQL> INSERT INTO Service_Order VALUES (7, 'Danielk', 300, 'Clean a set of couches',
+  2  				       '5234 South Haven Dr, Kentwood MI', '24-OCT-18', NULL);
+SQL> --
+SQL> INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
+SQL> INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
+SQL> INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
+SQL> INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
+SQL> INSERT INTO Task_In_Service_Order VALUES (4, 'Window Cleaning');
+SQL> INSERT INTO Task_In_Service_Order VALUES (4, 'Dust');
+SQL> INSERT INTO Task_In_Service_Order VALUES (5, 'Dust');
+SQL> INSERT INTO Task_In_Service_Order VALUES (6, 'Window Cleaning');
+SQL> INSERT INTO Task_In_Service_Order VALUES (6, 'Dust');
+SQL> INSERT INTO Task_In_Service_Order VALUES (6, 'Bathroom-general');
+SQL> INSERT INTO Task_In_Service_Order VALUES (7, 'Dust');
+SQL> --
+SQL> INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 2>');
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 3>');
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 4>');
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 5>');
+SQL> INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 1>');
+SQL> INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
+SQL> --
+SQL> INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
+SQL> INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 650, 'F');
+SQL> INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
+SQL> INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'T');
+SQL> INSERT INTO Bid VALUES ('26-NOV-18', 2, 'RWBnGreen', 80, 'F');
+SQL> INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'F');
+SQL> INSERT INTO Bid VALUES ('25-OCT-18', 7, 'InteriorDecor', 5000, 'F');
+SQL> INSERT INTO Bid VALUES ('05-NOV-18', 7, 'InteriorDecor', 4500, 'F');
+SQL> INSERT INTO Bid VALUES ('30-NOV-18', 5, 'MIFFLIN DUNDER', 75, 'T');
+SQL> INSERT INTO Bid VALUES ('25-NOV-18', 6, 'MIFFLIN DUNDER', 1300, 'T');
+SQL> INSERT INTO Bid VALUES ('15-NOV-18', 7, 'MIFFLIN DUNDER', 800, 'T');
+SQL> --
+SQL> INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
+  2  				 'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
+SQL> INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
+  2  				 'Great work done, windows looks real clean and shining.');
+SQL> INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
+  2  				 'They were nice, but the one guy kept pranking the other so he stormed out.');
+SQL> --
+SQL> SET FEEDBACK ON
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> --
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- PRINT OUT DATABASE
+SQL> -- --------------------------------------------------------------------
+SQL> SELECT * FROM App_User;
+
+USERNAME        FULLNAME                  PHONE EMAIL                           
+--------------- -------------------- ---------- ------------------------------  
+USERTYPE                                                                        
+---------                                                                       
+michaelb        Michael Benson       6164254849 mbenson@madeup.com              
+Customer                                                                        
+                                                                                
+dusty           Dustin Van Dyke      6168893456 dustinvd89@madeup.com           
+Customer                                                                        
+                                                                                
+SarahH          Sarah Han            5355678409 hansarah@madeup.com             
+Customer                                                                        
+                                                                                
+
+USERNAME        FULLNAME                  PHONE EMAIL                           
+--------------- -------------------- ---------- ------------------------------  
+USERTYPE                                                                        
+---------                                                                       
+CatLady         Sarah Han            5355678409 hansarah@madeup.com             
+Customer                                                                        
+                                                                                
+Cbing           Chandler Bing        2123457290 bing@mailsz.com                 
+Customer                                                                        
+                                                                                
+BathPros        Andrew Gorski        6163439732 service@bathpros.com            
+Provider                                                                        
+                                                                                
+
+USERNAME        FULLNAME                  PHONE EMAIL                           
+--------------- -------------------- ---------- ------------------------------  
+USERTYPE                                                                        
+---------                                                                       
+RWBnGreen       George Washington    6167041776 sales@greenusa.com              
+Provider                                                                        
+                                                                                
+MIFFLIN DUNDER  DWIGHT K. SCHRUTE    2123457290 corporatesales@dundermiff.com   
+Provider                                                                        
+                                                                                
+ASkywalker      Anakin Skywalker     6828524792 askywalker@jedicouncil.com      
+Customer                                                                        
+                                                                                
+
+USERNAME        FULLNAME                  PHONE EMAIL                           
+--------------- -------------------- ---------- ------------------------------  
+USERTYPE                                                                        
+---------                                                                       
+JaneB           Jane Bikoko          6328925723 janeb@lmail.com                 
+Customer                                                                        
+                                                                                
+Danielk         Daniel Kioko         5938205825 danik@pmail.com                 
+Customer                                                                        
+                                                                                
+CarpetSweep     Arnold Rust          3856412540 arnorf@carpetsweep.com          
+Provider                                                                        
+                                                                                
+
+USERNAME        FULLNAME                  PHONE EMAIL                           
+--------------- -------------------- ---------- ------------------------------  
+USERTYPE                                                                        
+---------                                                                       
+InteriorDecor   Donna Mary           3860153863 donm@interiordecor.com          
+Provider                                                                        
+                                                                                
+
+13 rows selected.
+
+SQL> SELECT * FROM Customer;
+
+CUSERNAME       CUSTADDR                                 CTYPE                  
+--------------- ---------------------------------------- ------------           
+CUSTBIO                                                                         
+--------------------------------------------------------------------------------
+michaelb        1234 Evans Way, Grand Rapids MI          Personal               
+My name is Mike. I like me house to be clean :)                                 
+                                                                                
+dusty           9898 Aurora Ave, Caledonia MI            Personal               
+I am allergic to dust, so have high standards.                                  
+                                                                                
+SarahH          7889 116th St, Grand Rapids MI           Professional           
+I manage Sunny Day Apartments on 116th St. Looking for good landscapers.        
+                                                                                
+
+CUSERNAME       CUSTADDR                                 CTYPE                  
+--------------- ---------------------------------------- ------------           
+CUSTBIO                                                                         
+--------------------------------------------------------------------------------
+CatLady         7889 116th St, Grand Rapids MI           Personal               
+I have many cats. Need hair and dust removed regularly.                         
+                                                                                
+Cbing           890 Marsh Ridge, Grand Rapids MI         Personal               
+Looking for my house windows to be cleaned.                                     
+                                                                                
+ASkywalker      6736 Jedi Path, Lansing MI               Personal               
+I do not like sand, it is course, rough, irritating, and it gets everywhere.    
+                                                                                
+
+CUSERNAME       CUSTADDR                                 CTYPE                  
+--------------- ---------------------------------------- ------------           
+CUSTBIO                                                                         
+--------------------------------------------------------------------------------
+JaneB           2146 L Michigan Dr , Grand Rapids MI     Professional           
+Pet Health Vetinary is searching for a dedicated cleaning company               
+                                                                                
+Danielk         5234 South Haven Dr, Kentwood MI         Personal               
+I have a set of couches that need detailing                                     
+                                                                                
+
+8 rows selected.
+
+SQL> SELECT * FROM Provider;
+
+PUSERNAME       PDESC                                                           
+--------------- ----------------------------------------------------------------
+BathPros        We are the best in the biz of wiz!                              
+RWBnGreen       We make your green show off some Red, White, and Blue.          
+MIFFLIN DUNDER  Helping you get your Scrant on since 2005                       
+CarpetSweep     One stop shop for all your carpet cleaning needs                
+InteriorDecor   Turning homes into palaces                                      
+
+5 rows selected.
+
+SQL> SELECT * FROM Provider_Branch;
+
+PUSERNAME       BRANCHADDRESS                                                   
+--------------- ----------------------------------------                        
+BathPros        3672 Division Ave, Grand Rapids MI                              
+BathPros        9002 22nd St, Grandville MI                                     
+CarpetSweep     4396 Burton Street , Muskegon MI                                
+InteriorDecor   2956 L Michigan Dr, Grand Rapids MI                             
+MIFFLIN DUNDER  300 Office street ave NW, Scranton MI                           
+RWBnGreen       19 N Square, Grand Rapids MI                                    
+
+6 rows selected.
+
+SQL> SELECT * FROM Task;
+
+TASKNAME                                                                        
+--------------------                                                            
+TASKDESC                                                                        
+--------------------------------------------------------------------------------
+Dust                                                                            
+Clean dust from one or many rooms                                               
+                                                                                
+Mow lawn                                                                        
+Cut grass or lawn to a specified length                                         
+                                                                                
+Yard-general                                                                    
+Typical landscaping tasks; mowing, weeding, raking                              
+                                                                                
+
+TASKNAME                                                                        
+--------------------                                                            
+TASKDESC                                                                        
+--------------------------------------------------------------------------------
+Bathroom-general                                                                
+Typical bathroom tasks; toilet, shower, floor, mirror                           
+                                                                                
+Window Cleaning                                                                 
+Expert bonded and insured window cleaners. Call for a free estimate Interior and
+ Exterior                                                                       
+                                                                                
+HVAC                                                                            
+Comprehensive air duct cleaning service for every part of the HVAC system       
+
+TASKNAME                                                                        
+--------------------                                                            
+TASKDESC                                                                        
+--------------------------------------------------------------------------------
+                                                                                
+CarpetCleaning                                                                  
+Carpet cleaning for both indoor and out corridors                               
+                                                                                
+
+7 rows selected.
+
+SQL> SELECT * FROM Provider_Specialized_Task;
+
+PUSERNAME       TASKNAME                                                        
+--------------- --------------------                                            
+BathPros        Bathroom-general                                                
+CarpetSweep     CarpetCleaning                                                  
+InteriorDecor   Dust                                                            
+MIFFLIN DUNDER  HVAC                                                            
+MIFFLIN DUNDER  Window Cleaning                                                 
+RWBnGreen       Mow lawn                                                        
+RWBnGreen       Yard-general                                                    
+
+7 rows selected.
+
+SQL> SELECT * FROM Service_Order;
+
+   ORDERNO OCUSERNAME      DESIREDPRICE                                         
+---------- --------------- ------------                                         
+ORDERDESC                                                                       
+----------------------------------------------------------------                
+ORDERLOC                                 DATEPOSTE BIDCLOSET                    
+---------------------------------------- --------- ---------                    
+         1 michaelb                                                             
+Clean my 2 bathrooms each Wednesday                                             
+1234 Evans Way, Grand Rapids MI          19-NOV-18 05-DEC-18                    
+                                                                                
+         2 dusty                     50                                         
+Dust my whole apartment every day                                               
+9898 Aurora Ave, Caledonia MI            19-NOV-18                              
+
+   ORDERNO OCUSERNAME      DESIREDPRICE                                         
+---------- --------------- ------------                                         
+ORDERDESC                                                                       
+----------------------------------------------------------------                
+ORDERLOC                                 DATEPOSTE BIDCLOSET                    
+---------------------------------------- --------- ---------                    
+                                                                                
+         3 SarahH                   500                                         
+Maintain the apartment grounds                                                  
+7889 116th St, Grand Rapids MI           20-NOV-18                              
+                                                                                
+         4 Cbing                    750                                         
+Clean the interior and exterior windows of the building                         
+
+   ORDERNO OCUSERNAME      DESIREDPRICE                                         
+---------- --------------- ------------                                         
+ORDERDESC                                                                       
+----------------------------------------------------------------                
+ORDERLOC                                 DATEPOSTE BIDCLOSET                    
+---------------------------------------- --------- ---------                    
+890 Marsh Ridge, Grand Rapids MI         22-NOV-18                              
+                                                                                
+         5 CatLady                   75                                         
+Clean my apartment from the cats                                                
+7889 116th St, Apt A, Grand Rapids MI    26-NOV-18                              
+                                                                                
+         6 SarahH                  1300                                         
+
+   ORDERNO OCUSERNAME      DESIREDPRICE                                         
+---------- --------------- ------------                                         
+ORDERDESC                                                                       
+----------------------------------------------------------------                
+ORDERLOC                                 DATEPOSTE BIDCLOSET                    
+---------------------------------------- --------- ---------                    
+Clean a recently vacated apartment                                              
+7889 116th St, Apt 5B, Grand Rapids MI   29-NOV-18                              
+                                                                                
+         7 Danielk                  300                                         
+Clean a set of couches                                                          
+5234 South Haven Dr, Kentwood MI         24-OCT-18                              
+                                                                                
+
+7 rows selected.
+
+SQL> SELECT * FROM Task_In_Service_Order;
+
+   ORDERNO TASKNAME                                                             
+---------- --------------------                                                 
+         1 Bathroom-general                                                     
+         2 Dust                                                                 
+         3 Mow lawn                                                             
+         3 Yard-general                                                         
+         4 Dust                                                                 
+         4 Window Cleaning                                                      
+         5 Dust                                                                 
+         6 Bathroom-general                                                     
+         6 Dust                                                                 
+         6 Window Cleaning                                                      
+         7 Dust                                                                 
+
+11 rows selected.
+
+SQL> SELECT * FROM Service_Order_Photos;
+
+   ORDERNO PHOTO                                                                
+---------- ----------------------------------------------------------------     
+         2 <photo of my apartment>                                              
+         3 <photo of grounds 1>                                                 
+         3 <photo of grounds 2>                                                 
+         3 <photo of grounds 3>                                                 
+         3 <photo of grounds 4>                                                 
+         3 <photo of grounds 5>                                                 
+         4 <photo of windows 1>                                                 
+         4 <photo of windows 2>                                                 
+
+8 rows selected.
+
+SQL> SELECT * FROM Bid;
+
+BIDDATE      ORDERNO PUSERNAME           BIDAMT B                               
+--------- ---------- --------------- ---------- -                               
+21-NOV-18          3 RWBnGreen              450 T                               
+21-NOV-18          4 RWBnGreen              650 F                               
+23-NOV-18          4 MIFFLIN DUNDER         700 T                               
+27-NOV-18          2 MIFFLIN DUNDER          50 T                               
+26-NOV-18          2 RWBnGreen               80 F                               
+25-NOV-18          2 MIFFLIN DUNDER          90 F                               
+25-OCT-18          7 InteriorDecor         5000 F                               
+05-NOV-18          7 InteriorDecor         4500 F                               
+30-NOV-18          5 MIFFLIN DUNDER          75 T                               
+25-NOV-18          6 MIFFLIN DUNDER        1300 T                               
+15-NOV-18          7 MIFFLIN DUNDER         800 T                               
+
+11 rows selected.
+
+SQL> SELECT * FROM Reviews;
+
+CUSERNAME       PUSERNAME       REVDATE    REVRATING                            
+--------------- --------------- --------- ----------                            
+REVDESC                                                                         
+--------------------------------------------------------------------------------
+SarahH          RWBnGreen       22-NOV-18          4                            
+Would rate them 5 stars, but they mowed an American flag pattern into the yard. 
+                                                                                
+Cbing           MIFFLIN DUNDER  26-NOV-18          5                            
+Great work done, windows looks real clean and shining.                          
+                                                                                
+dusty           MIFFLIN DUNDER  28-NOV-18          2                            
+They were nice, but the one guy kept pranking the other so he stormed out.      
+                                                                                
+
+3 rows selected.
+
+SQL> --
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- EXECUTE QUERIES
+SQL> -- --------------------------------------------------------------------
+SQL> -- Query 1: A join involving at least four relations.
+SQL> --  --> Find all users of the app that have requested cleaning to be done along with what they have
+SQL> --      requested and when it was requested
+SQL> SELECT DISTINCT A.fullName, C.cType, O.orderLoc, O.datePosted, O.orderDesc, T.taskName
+  2  FROM App_User A, Customer C, Service_Order O, Task_In_Service_Order T
+  3  WHERE A.userName = C.cUserName AND
+  4  	   O.ocUserName = C.cUserName AND
+  5  	   O.orderNo = T.orderNo;
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+Sarah Han            Professional 7889 116th St, Grand Rapids MI                
+20-NOV-18 Maintain the apartment grounds                                        
+Mow lawn                                                                        
+                                                                                
+Chandler Bing        Personal     890 Marsh Ridge, Grand Rapids MI              
+22-NOV-18 Clean the interior and exterior windows of the building               
+Window Cleaning                                                                 
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+                                                                                
+Daniel Kioko         Personal     5234 South Haven Dr, Kentwood MI              
+24-OCT-18 Clean a set of couches                                                
+Dust                                                                            
+                                                                                
+Chandler Bing        Personal     890 Marsh Ridge, Grand Rapids MI              
+22-NOV-18 Clean the interior and exterior windows of the building               
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+Dust                                                                            
+                                                                                
+Sarah Han            Professional 7889 116th St, Apt 5B, Grand Rapids MI        
+29-NOV-18 Clean a recently vacated apartment                                    
+Dust                                                                            
+                                                                                
+Sarah Han            Professional 7889 116th St, Apt 5B, Grand Rapids MI        
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+29-NOV-18 Clean a recently vacated apartment                                    
+Bathroom-general                                                                
+                                                                                
+Sarah Han            Professional 7889 116th St, Apt 5B, Grand Rapids MI        
+29-NOV-18 Clean a recently vacated apartment                                    
+Window Cleaning                                                                 
+                                                                                
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+Sarah Han            Personal     7889 116th St, Apt A, Grand Rapids MI         
+26-NOV-18 Clean my apartment from the cats                                      
+Dust                                                                            
+                                                                                
+Dustin Van Dyke      Personal     9898 Aurora Ave, Caledonia MI                 
+19-NOV-18 Dust my whole apartment every day                                     
+Dust                                                                            
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+                                                                                
+Michael Benson       Personal     1234 Evans Way, Grand Rapids MI               
+19-NOV-18 Clean my 2 bathrooms each Wednesday                                   
+Bathroom-general                                                                
+                                                                                
+Sarah Han            Professional 7889 116th St, Grand Rapids MI                
+20-NOV-18 Maintain the apartment grounds                                        
+
+FULLNAME             CTYPE        ORDERLOC                                      
+-------------------- ------------ ----------------------------------------      
+DATEPOSTE ORDERDESC                                                             
+--------- ----------------------------------------------------------------      
+TASKNAME                                                                        
+--------------------                                                            
+Yard-general                                                                    
+                                                                                
+
+11 rows selected.
+
+SQL> --
+SQL> -- Query 2: A self-join
+SQL> --  --> Find all email accounts associated with both 'Professional' and 'Personal' accounts
+SQL> SELECT U1.email, C1.cUserName AS "Professional", C2.cUserName AS "Personal"
+  2  FROM Customer C1, Customer C2, App_User U1, App_User U2
+  3  WHERE C1.cUserName = U1.userName AND
+  4  	   C2.cUserName = U2.userName AND
+  5  	   C1.cType = 'Professional' AND
+  6  	   C2.cType = 'Personal' AND
+  7  	   U1.email = U2.email;
+
+EMAIL                          Professional    Personal                         
+------------------------------ --------------- ---------------                  
+hansarah@madeup.com            SarahH          CatLady                          
+
+1 row selected.
+
+SQL> --
+SQL> -- Query 3: UNION, INTERSECT, and/or MINUS
+SQL> --  --> MINUS: Find Providers that have not made any bids
+SQL> SELECT pUserName as Providers
+  2  FROM Provider
+  3  MINUS
+  4  SELECT pUserName
+  5  FROM Bid;
+
+PROVIDERS                                                                       
+---------------                                                                 
+BathPros                                                                        
+CarpetSweep                                                                     
+
+2 rows selected.
+
+SQL> --
+SQL> -- Query 4: SUM, AVG, MAX, and/or MIN
+SQL> --  --> MAX: Find the highest bid by each company
+SQL> SELECT A.fullName, MAX(bidAmt) AS "Top Bid"
+  2  FROM Bid B, Provider P, App_User A
+  3  WHERE B.pUserName = P.pUserName AND
+  4  	   P.pUserName = A.userName
+  5  GROUP BY A.fullName;
+
+FULLNAME                Top Bid                                                 
+-------------------- ----------                                                 
+George Washington           650                                                 
+DWIGHT K. SCHRUTE          1300                                                 
+Donna Mary                 5000                                                 
+
+3 rows selected.
+
+SQL> --
+SQL> -- Query 5: GROUP BY, HAVING, and ORDER BY, all appearing in the same query
+SQL> --  --> Find the order numbers which have more than one bid on them
+SQL> SELECT B.orderNo, COUNT(*) as "Num of Bids"
+  2  FROM Bid B
+  3  HAVING COUNT(*) > 1
+  4  GROUP BY B.orderNo
+  5  ORDER BY B.orderNo;
+
+   ORDERNO Num of Bids                                                          
+---------- -----------                                                          
+         2           3                                                          
+         4           2                                                          
+         7           3                                                          
+
+3 rows selected.
+
+SQL> --
+SQL> -- Query 6: A correlated subquery
+SQL> --  --> Find the bids that were greater than the average bid per order
+SQL> SELECT B.bidDate, B.pUserName, B.orderNo, B.bidAmt, B.bidWon as W
+  2  FROM Bid B
+  3  WHERE B.bidAMT > (SELECT AVG(bidAmt)
+  4  		       FROM Bid
+  5  		       WHERE orderNo = B.orderNo);
+
+BIDDATE   PUSERNAME          ORDERNO     BIDAMT W                               
+--------- --------------- ---------- ---------- -                               
+23-NOV-18 MIFFLIN DUNDER           4        700 T                               
+26-NOV-18 RWBnGreen                2         80 F                               
+25-NOV-18 MIFFLIN DUNDER           2         90 F                               
+25-OCT-18 InteriorDecor            7       5000 F                               
+05-NOV-18 InteriorDecor            7       4500 F                               
+
+5 rows selected.
+
+SQL> --
+SQL> -- Query 7: A non-correlated subquery
+SQL> --  --> Find providers who do not have any reviews
+SQL> SELECT P.pUserName
+  2  FROM Provider P
+  3  WHERE P.pUserName NOT IN (SELECT R.pUserName
+  4  			       FROM Reviews R);
+
+PUSERNAME                                                                       
+---------------                                                                 
+InteriorDecor                                                                   
+CarpetSweep                                                                     
+BathPros                                                                        
+
+3 rows selected.
+
+SQL> --
+SQL> -- Query 8: A relational DIVISION query
+SQL> --  --> Find providers that have bid on all orders containing the task 'Dust'
+SQL> SELECT P.pUserName
+  2  FROM Provider P
+  3  WHERE NOT EXISTS((SELECT O.orderNo
+  4  				       FROM Task_In_Service_Order T, Service_Order O
+  5  				       WHERE T.orderNo = O.orderNo AND T.taskName = 'Dust')
+  6  				      MINUS
+  7  				      (SELECT O.orderNo
+  8  				       FROM Task_In_Service_Order T, Service_Order O, Bid B
+  9  				       WHERE B.orderNo = O.OrderNo AND
+ 10  			     B.pUserName = P.pUserName AND
+ 11  						 O.orderNo = T.orderNo AND
+ 12  						 T.taskName = 'Dust'));
+
+PUSERNAME                                                                       
+---------------                                                                 
+MIFFLIN DUNDER                                                                  
+
+1 row selected.
+
+SQL> PAUSE;
+
+SQL> --
+SQL> -- Query 9: An outer join
+SQL> --  --> Find orders by customer, whether they have orders or not
+SQL> SELECT C.cUserName, C.cType, O.orderNo
+  2  FROM Customer C LEFT OUTER JOIN Service_Order O
+  3  	 ON C.cUserName = O.ocUserName
+  4  ORDER BY C.cUserName;
+
+CUSERNAME       CTYPE           ORDERNO                                         
+--------------- ------------ ----------                                         
+ASkywalker      Personal                                                        
+CatLady         Personal              5                                         
+Cbing           Personal              4                                         
+Danielk         Personal              7                                         
+JaneB           Professional                                                    
+SarahH          Professional          3                                         
+SarahH          Professional          6                                         
+dusty           Personal              2                                         
+michaelb        Personal              1                                         
+
+9 rows selected.
+
+SQL> --
+SQL> -- Query 10: A RANK query
+SQL> --  --> Find the rank of 2 in the reviews table
+SQL> SELECT RANK (2) WITHIN GROUP
+  2  (ORDER BY revRating DESC) "Rank of rating 2"
+  3  FROM Reviews;
+
+Rank of rating 2                                                                
+----------------                                                                
+               3                                                                
+
+1 row selected.
+
+SQL> --
+SQL> -- Query 11: A Top-N query
+SQL> --  --> Find the 3 highest bids
+SQL> SELECT orderNo, pUserName, bidAmt, bidWon as W
+  2  FROM (SELECT orderNo, pUserName, bidAmt, bidWon
+  3  	   FROM Bid
+  4  	   ORDER BY bidAmt DESC)
+  5  WHERE ROWNUM < 4;
+
+   ORDERNO PUSERNAME           BIDAMT W                                         
+---------- --------------- ---------- -                                         
+         7 InteriorDecor         5000 F                                         
+         7 InteriorDecor         4500 F                                         
+         6 MIFFLIN DUNDER        1300 T                                         
+
+3 rows selected.
+
+SQL> --
+SQL> --
+SQL> -- --------------------------------------------------------------------
+SQL> -- TEST INTEGRITY CONSTRAINTS
+SQL> -- --------------------------------------------------------------------
+SQL> WHENEVER SQLERROR CONTINUE
+SQL> --
+SQL> -- Testing: Bid_PK
+SQL> --  --> Note that during table creation, this same bid was entered, but with a bidAmt of 650
+SQL> INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
+INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F')
+*
+ERROR at line 1:
+ORA-00001: unique constraint (KREDITK.BID_PK) violated 
+
+
+SQL> --
+SQL> -- Testing: Provider_FK_1
+SQL> --  --> Note that no App_User with this username exists
+SQL> INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
+INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes')
+*
+ERROR at line 1:
+ORA-02291: integrity constraint (KREDITK.PROVIDER_FK_1) violated - parent key 
+not found 
+
+
+SQL> --
+SQL> -- Testing: App_User_1A_2
+SQL> --  --> Note that a user needs to enter if they are a Customer or Provider
+SQL> INSERT INTO App_User VALUES ('Minto League', 'ASH', 2273577889, 'corporatesales@pokemon.com', 'Trainer');
+INSERT INTO App_User VALUES ('Minto League', 'ASH', 2273577889, 'corporatesales@pokemon.com', 'Trainer')
+*
+ERROR at line 1:
+ORA-02290: check constraint (KREDITK.APP_USER_1A_2) violated 
+
+
+SQL> --
+SQL> -- Testing: App_User_2A_1
+SQL> --  --> Note that a user must at least have a phone or email for registration
+SQL> INSERT INTO App_User VALUES ('GoCleaners', 'John Doe', NULL, NULL, 'Provider');
+INSERT INTO App_User VALUES ('GoCleaners', 'John Doe', NULL, NULL, 'Provider')
+*
+ERROR at line 1:
+ORA-02290: check constraint (KREDITK.APP_USER_2A_1) violated 
+
+
+SQL> --
+SQL> -- Testing: Service_Order_Photos_2R_1
+SQL> --  --> Note that during table creation, Service_Order 3 already had 5 photos added
+SQL> INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 6>');
+INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 6>')
+            *
+ERROR at line 1:
+ORA-20001: +++++INSERT or UPDATE rejected. Order Number 3 cannot allow more 
+than 5 photo uploads 
+ORA-06512: at "KREDITK.SERVICE_ORDER_PHOTOS_2R_1", line 12 
+ORA-04088: error during execution of trigger 
+'KREDITK.SERVICE_ORDER_PHOTOS_2R_1' 
+
+
+SQL> --
+SQL> --
+SQL> COMMIT;
+
+Commit complete.
+
+SQL> SPOOL OFF;
