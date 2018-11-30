@@ -406,3 +406,4 @@ INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 6>');
 --
 --
 COMMIT;
+SPOOL OFF;
