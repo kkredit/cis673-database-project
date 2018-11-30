@@ -77,8 +77,7 @@ orderLoc        VARCHAR(40) NOT NULL,
 datePosted      DATE,
 bidcloseTime    DATE,
 CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
----Service_Order_2R_2: See trigger below
-
+-- Service_Order_2R_2: See trigger below
 );
 --
 CREATE TABLE Task_In_Service_Order (
@@ -199,8 +198,6 @@ INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids
 INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
 INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
 INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
-INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
-INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
 INSERT INTO Provider_Branch VALUES ('CarpetSweep', '4396 Burton Street , Muskegon MI');
 INSERT INTO Provider_Branch VALUES ('InteriorDecor', '2956 L Michigan Dr, Grand Rapids MI');
 --
@@ -265,8 +262,6 @@ INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
 INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
                             'Great work done, windows looks real clean and shining.');
-INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
-                            'They were nice, but the one guy kept pranking the other so he stormed out.');
 INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
                             'They were nice, but the one guy kept pranking the other so he stormed out.');
 --
