@@ -357,17 +357,20 @@ WHERE P.pUserName NOT IN (SELECT R.pUserName
                           FROM Reviews R);
 --
 -- Query 8: A relational DIVISION query
---SELECT B.pUserName
---FROM Bid B
---WHERE NOT EXISTS((SELECT T.orderNo
---				FROM Task_In_Service_Order T
---				WHERE T.taskName = 'Dust')
---				MINUS
---				(SELECT S.orderNo
---				FROM Task_In_Service_Order T, Service_Order S
---				WHERE B.orderNo = S.OrderNo AND
---					  S.orderNo = T.orderNo AND
---					  T.taskName = 'Dust'));                 
+--  --> Find providers that have bid on all orders containing the task 'Dust'
+SELECT P.pUserName
+FROM Provider P
+WHERE NOT EXISTS((SELECT O.orderNo
+                  FROM Task_In_Service_Order T, Service_Order O
+                  WHERE T.orderNo = O.orderNo AND T.taskName = 'Dust')
+                 MINUS
+                 (SELECT O.orderNo
+                  FROM Task_In_Service_Order T, Service_Order O, Bid B
+                  WHERE B.orderNo = O.OrderNo AND
+                        B.pUserName = P.pUserName AND
+                        O.orderNo = T.orderNo AND
+                        T.taskName = 'Dust'));
+PAUSE;
 --
 -- Query 9: An outer join
 --  --> Find orders by customer, whether they have orders or not
