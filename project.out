@@ -863,23 +863,21 @@ SQL> --  --> Find providers that have bid on all orders containing the task 'Dus
 SQL> SELECT P.pUserName
   2  FROM Provider P
   3  WHERE NOT EXISTS((SELECT O.orderNo
-  4  				       FROM Task_In_Service_Order T, Service_Order O
-  5  				       WHERE T.orderNo = O.orderNo AND T.taskName = 'Dust')
-  6  				      MINUS
-  7  				      (SELECT O.orderNo
-  8  				       FROM Task_In_Service_Order T, Service_Order O, Bid B
-  9  				       WHERE B.orderNo = O.OrderNo AND
+  4  		       FROM Task_In_Service_Order T, Service_Order O
+  5  		       WHERE T.orderNo = O.orderNo AND T.taskName = 'Dust')
+  6  		      MINUS
+  7  		      (SELECT O.orderNo
+  8  		       FROM Task_In_Service_Order T, Service_Order O, Bid B
+  9  		       WHERE B.orderNo = O.OrderNo AND
  10  			     B.pUserName = P.pUserName AND
- 11  						 O.orderNo = T.orderNo AND
- 12  						 T.taskName = 'Dust'));
+ 11  			     O.orderNo = T.orderNo AND
+ 12  			     T.taskName = 'Dust'));
 
 PUSERNAME                                                                       
 ---------------                                                                 
 MIFFLIN DUNDER                                                                  
 
 1 row selected.
-
-SQL> PAUSE;
 
 SQL> --
 SQL> -- Query 9: An outer join
