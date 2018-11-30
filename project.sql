@@ -24,45 +24,45 @@ SET ECHO ON
 -- CREATE THE TABLES
 -- --------------------------------------------------------------------
 CREATE TABLE App_User (
-userName    VARCHAR(64) PRIMARY KEY,
-fullName    VARCHAR(64) NOT NULL,
+userName    VARCHAR(15) PRIMARY KEY,
+fullName    VARCHAR(20) NOT NULL,
 phone       INTEGER,
-email       VARCHAR(64),
-userType    VARCHAR(64),
+email       VARCHAR(30),
+userType    VARCHAR(9),
 CONSTRAINT App_User_1A_2     CHECK (userType IN ('Customer', 'Provider')),
 CONSTRAINT App_User_2A_1     CHECK (NOT (phone is NULL AND email is NULL))
 );
 --
 CREATE TABLE Customer (
-cUserName   VARCHAR(64) PRIMARY KEY,
-custAddr    VARCHAR(64) NOT NULL,
-cType       VARCHAR(64) NOT NULL,
+cUserName   VARCHAR(15) PRIMARY KEY,
+custAddr    VARCHAR(40) NOT NULL,
+cType       VARCHAR(12) NOT NULL,
 custBio     VARCHAR(256),
 CONSTRAINT Customer_FK1     FOREIGN KEY(cUserName) REFERENCES App_User(userName),
 CONSTRAINT Customer_1A_2    CHECK(cType IN('Professional', 'Personal'))
 );
 --
 CREATE TABLE Provider (
-pUserName   VARCHAR(64) PRIMARY KEY,
+pUserName   VARCHAR(15) PRIMARY KEY,
 pDesc       VARCHAR(64) NOT NULL,
 CONSTRAINT  Provider_FK_1   FOREIGN KEY(pUserName) REFERENCES App_User(userName)
 );
 --
 CREATE TABLE Provider_Branch (
-pUserName       VARCHAR(64),
-branchAddress   VARCHAR(64),
+pUserName       VARCHAR(15),
+branchAddress   VARCHAR(40),
 CONSTRAINT P_Branch_Key     PRIMARY KEY(pUserName, branchAddress),
 CONSTRAINT P_Branch_FK_1    FOREIGN KEY(pUserName) REFERENCES Provider(pUserName)
 );
 --
 CREATE TABLE Task (
-taskName    VARCHAR(64) PRIMARY KEY,
+taskName    VARCHAR(20) PRIMARY KEY,
 taskDesc    VARCHAR(256) NOT NULL
 );
 --
 CREATE TABLE Provider_Specialized_Task (
-pUserName   VARCHAR(64),
-taskName    VARCHAR(64),
+pUserName   VARCHAR(15),
+taskName    VARCHAR(20),
 CONSTRAINT P_Specialized_TaskKey    PRIMARY KEY(pUserName, taskName),
 CONSTRAINT P_Specialized_TaskFK_1   FOREIGN KEY(pUserName) REFERENCES Provider(pUserName),
 CONSTRAINT P_Specialized_TaskFK_2   FOREIGN KEY(taskName) REFERENCES Task(taskName)
@@ -70,10 +70,10 @@ CONSTRAINT P_Specialized_TaskFK_2   FOREIGN KEY(taskName) REFERENCES Task(taskNa
 --
 CREATE TABLE Service_Order (
 orderNo         INT PRIMARY KEY,
-ocUserName      VARCHAR(64),
+ocUserName      VARCHAR(15),
 desiredPrice    INT,
 orderDesc       VARCHAR(64) NOT NULL,
-orderLoc        VARCHAR(64) NOT NULL,
+orderLoc        VARCHAR(40) NOT NULL,
 datePosted      DATE,
 bidcloseTime    DATE,
 CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
@@ -81,7 +81,7 @@ CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUser
 --
 CREATE TABLE Task_In_Service_Order (
 orderNo     INT,
-taskName    VARCHAR(64),
+taskName    VARCHAR(20),
 CONSTRAINT TaskService_OrderKey      PRIMARY KEY(orderNo, taskName),
 CONSTRAINT TaskService_Order_FK_1    FOREIGN KEY(orderNo) REFERENCES Service_Order(orderNo),
 CONSTRAINT TaskService_Order_FK_2    FOREIGN KEY(taskName) REFERENCES Task(taskName)
@@ -98,7 +98,7 @@ CONSTRAINT Service_Order_Photos_FK_1     FOREIGN KEY(orderNo) REFERENCES Service
 CREATE TABLE Bid (
 bidDate     DATE,
 orderNo     INT,
-pUserName   VARCHAR(64),
+pUserName   VARCHAR(15),
 bidAmt      INT NOT NULL,
 bidWon      CHAR(1) DEFAULT('F'),
 CONSTRAINT Bid_PK       PRIMARY KEY(bidDate, orderNo, pUserName),
@@ -108,9 +108,9 @@ CONSTRAINT Bid_1A_1     CHECK( bidWon IN ('T', 'F') )
 );
 --
 CREATE TABLE Reviews (
-cUserName   VARCHAR(64),
-pUserName   VARCHAR(64),
-revDate     VARCHAR(64) NOT NULL,
+cUserName   VARCHAR(15),
+pUserName   VARCHAR(15),
+revDate     DATE NOT NULL,
 revRating   INT NOT NULL,
 revDesc     VARCHAR(256),
 CONSTRAINT Reviews_Key      PRIMARY KEY(cUserName, pUserName),
@@ -267,7 +267,7 @@ WHERE A.userName = C.cUserName AND
 --
 -- Query 2: A self-join
 --  --> Find all email accounts associated with both 'Professional' and 'Personal' accounts
-SELECT U1.email, C1.cUserName AS ProfessionalAccount, C2.cUserName AS PersonalAccount
+SELECT U1.email, C1.cUserName AS "Professional", C2.cUserName AS "Personal"
 FROM Customer C1, Customer C2, App_User U1, App_User U2
 WHERE C1.cUserName = U1.userName AND
       C2.cUserName = U2.userName AND
@@ -277,7 +277,7 @@ WHERE C1.cUserName = U1.userName AND
 --
 -- Query 3: UNION, INTERSECT, and/or MINUS
 --  --> MINUS: Find Providers that have not made any bids
-SELECT pUserName
+SELECT pUserName as Providers
 FROM Provider
 MINUS
 SELECT pUserName
@@ -285,7 +285,7 @@ FROM Bid;
 --
 -- Query 4: SUM, AVG, MAX, and/or MIN
 --  --> MAX: Find the highest bid by each company
-SELECT A.fullName, MAX(bidAmt) AS Top_Bid
+SELECT A.fullName, MAX(bidAmt) AS "Top Bid"
 FROM Bid B, Provider P, App_User A
 WHERE B.pUserName = P.pUserName AND
       P.pUserName = A.userName
@@ -293,7 +293,7 @@ GROUP BY A.fullName;
 --
 -- Query 5: GROUP BY, HAVING, and ORDER BY, all appearing in the same query
 --  --> Find the order numbers which have more than one bid on them
-SELECT B.orderNo, COUNT(*)
+SELECT B.orderNo, COUNT(*) as "Num of Bids"
 FROM Bid B
 HAVING COUNT(*) > 1
 GROUP BY B.orderNo
@@ -301,7 +301,7 @@ ORDER BY B.orderNo;
 --
 -- Query 6: A correlated subquery
 --  --> Find the bids that were greater than the average bid per order
-SELECT B.bidDate, B.pUserName, B.orderNo, B.bidAmt, B.bidWon
+SELECT B.bidDate, B.pUserName, B.orderNo, B.bidAmt, B.bidWon as W
 FROM Bid B
 WHERE B.bidAMT > (SELECT AVG(bidAmt)
                   FROM Bid
@@ -332,7 +332,7 @@ FROM Reviews;
 --
 -- Query 11: A Top-N query
 --  --> Find the 3 highest bids
-SELECT orderNo, pUserName, bidAmt, bidWon
+SELECT orderNo, pUserName, bidAmt, bidWon as W
 FROM (SELECT orderNo, pUserName, bidAmt, bidWon
       FROM Bid
       ORDER BY bidAmt DESC)
