@@ -259,12 +259,14 @@ INSERT INTO Service_Order_Photos VALUES (4, '<photo of windows 2>');
 INSERT INTO Bid VALUES ('21-NOV-18', 3, 'RWBnGreen', 450, 'T');
 INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 650, 'F');
 INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
-INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'F');
+INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'T');
 INSERT INTO Bid VALUES ('26-NOV-18', 2, 'RWBnGreen', 80, 'F');
-INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'T');
+INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'F');
 INSERT INTO Bid VALUES ('25-OCT-18', 7, 'InteriorDecor', 5000, 'F');
 INSERT INTO Bid VALUES ('05-NOV-18', 7, 'InteriorDecor', 4500, 'F');
-
+INSERT INTO Bid VALUES ('30-NOV-18', 5, 'MIFFLIN DUNDER', 75, 'T');
+INSERT INTO Bid VALUES ('25-NOV-18', 6, 'MIFFLIN DUNDER', 1300, 'T');
+INSERT INTO Bid VALUES ('15-NOV-18', 7, 'MIFFLIN DUNDER', 800, 'T');
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
