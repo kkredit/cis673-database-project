@@ -357,7 +357,7 @@ INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related mes
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
 --
 -- Testing: User_2A_1
---  --> Note that a user must atleast have a phone or email for registeration
+--  --> Note that a user must atleast have a phone or email for registration
 INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');
 --
 -- Testing: Service_Order_Photos_2R_1
