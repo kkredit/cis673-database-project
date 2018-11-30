@@ -385,8 +385,9 @@ INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
 --
 -- Testing: User_1A_2
---  --> Note that a user needs to enter if they are a customer or provider.
-INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
+--  --> Note that a user needs to enter if they are a Customer or Provider.
+INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290,
+'corporatesales@dundermiff.com', 'SuperUser');
 --
 -- Testing: User_2A_1
 --  --> Note that a user must atleast have a phone or email for registration
