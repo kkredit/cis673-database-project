@@ -391,8 +391,9 @@ INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related mes
 --
 -- Testing: User_1A_2
 --  --> Note that a user needs to enter if they are a customer or provider.
-INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
+INSERT INTO App_User VALUES ('Minto League', 'ASH', 2273577889, 'corporatesales@pokemon.com', 'gymtrainer');
 --
+-- Test
 -- Testing: User_2A_1
 --  --> Note that a user must atleast have a phone or email for registration
  INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');                     
