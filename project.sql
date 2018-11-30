@@ -357,7 +357,17 @@ WHERE P.pUserName NOT IN (SELECT R.pUserName
                           FROM Reviews R);
 --
 -- Query 8: A relational DIVISION query
---                 
+--SELECT B.pUserName
+--FROM Bid B
+--WHERE NOT EXISTS((SELECT T.orderNo
+--				FROM Task_In_Service_Order T
+--				WHERE T.taskName = 'Dust')
+--				MINUS
+--				(SELECT S.orderNo
+--				FROM Task_In_Service_Order T, Service_Order S
+--				WHERE B.orderNo = S.OrderNo AND
+--					  S.orderNo = T.orderNo AND
+--					  T.taskName = 'Dust'));                 
 --
 -- Query 9: An outer join
 --  --> Find orders by customer, whether they have orders or not
