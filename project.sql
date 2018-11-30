@@ -75,7 +75,7 @@ desiredPrice    INT,
 orderDesc       VARCHAR(64) NOT NULL,
 orderLoc        VARCHAR(40) NOT NULL,
 datePosted      DATE,
-bidcloseTime    DATE,
+bidCloseTime    DATE,
 CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
 -- Service_Order_2R_2: See trigger below
 );
@@ -122,7 +122,7 @@ CONSTRAINT Reviews_FK_2     FOREIGN KEY(pUserName) REFERENCES Provider(pUserName
 --
 -- Trigger for Constraint Order_Photos_2R_1
 CREATE OR REPLACE TRIGGER Service_Order_Photos_2R_1
-BEFORE INSERT ON Service_Order_Photos
+BEFORE INSERT OR UPDATE ON Service_Order_Photos
 FOR EACH ROW
 DECLARE
     numFound INTEGER;
@@ -140,17 +140,20 @@ BEGIN
     END IF;
 END;
 /
-SHOW ERROR
 --
 -- Trigger for Constraint Service_Order_2R_2
-/*CREATE OR REPLACE TRIGGER Service_Order_2R_2
-BEFORE DELETE ON Service_Order
+--  --> NOTE: this trigger is EXTRA and does not currently work
+CREATE OR REPLACE TRIGGER Service_Order_2R_2
+BEFORE INSERT OR UPDATE ON Service_Order
 FOR EACH ROW
-WHEN ((SYSTEMTIMESTAMP -:Service_Order.datePosted) < 31)
 BEGIN
-DELETE FROM Service_Order;
+    IF TRUNC(SYSDATE-10) > :NEW.bidCloseTime
+    THEN
+        RAISE_APPLICATION_ERROR(-20001, '+++++INSERT or UPDATE rejected. Order date is in the past');
+    END IF;
 END;
- */
+/
+ALTER TRIGGER Service_Order_2R_2 DISABLE;
 --
 -- --------------------------------------------------------------------
 -- POPULATE THE TABLES
