@@ -370,7 +370,6 @@ WHERE NOT EXISTS((SELECT O.orderNo
                         B.pUserName = P.pUserName AND
                         O.orderNo = T.orderNo AND
                         T.taskName = 'Dust'));
-PAUSE;
 --
 -- Query 9: An outer join
 --  --> Find orders by customer, whether they have orders or not
