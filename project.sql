@@ -208,7 +208,6 @@ INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, sh
 INSERT INTO Task VALUES ('Window Cleaning', 'Expert bonded and insured window cleaners. Call for a free estimate Interior and Exterior');
 INSERT INTO Task VALUES ('HVAC','Comprehensive air duct cleaning service for every part of the HVAC system');
 INSERT INTO Task VALUES ('CarpetCleaning','Carpet cleaning for both indoor and out corridors');
-
 --
 INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
@@ -238,6 +237,12 @@ INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Mow lawn');
 INSERT INTO Task_In_Service_Order VALUES (3, 'Yard-general');
 INSERT INTO Task_In_Service_Order VALUES (4, 'Window Cleaning');
+INSERT INTO Task_In_Service_Order VALUES (4, 'Dust')
+INSERT INTO Task_In_Service_Order VALUES (5, 'Dust')
+INSERT INTO Task_In_Service_Order VALUES (6, 'Window Cleaning')
+INSERT INTO Task_In_Service_Order VALUES (6, 'Dust')
+INSERT INTO Task_In_Service_Order VALUES (6, 'Bathroom-general')  
+INSERT INTO Task_In_Service_Order VALUES (7, 'Dust')                     
 --
 INSERT INTO Service_Order_Photos VALUES (2, '<photo of my apartment>');
 INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 1>');
@@ -385,14 +390,10 @@ INSERT INTO Bid VALUES ('21-NOV-18', 4, 'RWBnGreen', 600, 'F');
 INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related messes');
 --
 -- Testing: User_1A_2
---  --> Note that a user needs to enter if they are a Customer or Provider.
-INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290,
-'corporatesales@dundermiff.com', 'SuperUser');
+--  --> Note that a user needs to enter if they are a customer or provider.
+INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
 --
--- Testing: User_2A_1
---  --> Note that a user must atleast have a phone or email for registration
-INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');
--- 
+-- Testing: 
 --
 -- Testing: Service_Order_Photos_2R_1
 --  --> Note that during table creation, Service_Order 3 already had 5 photos added
