@@ -77,6 +77,8 @@ orderLoc        VARCHAR(40) NOT NULL,
 datePosted      DATE,
 bidcloseTime    DATE,
 CONSTRAINT Service_Order_FK_1  FOREIGN KEY(ocUserName) REFERENCES Customer(cUserName)
+---Service_Order_2R_2: See trigger below
+
 );
 --
 CREATE TABLE Task_In_Service_Order (
@@ -140,6 +142,16 @@ BEGIN
 END;
 /
 SHOW ERROR
+                     
+/*CREATE OR REPLACE TRIGGER Service_Order_2R_2
+BEFORE DELETE ON Service_Order 
+FOR EACH ROW                 
+WHEN ((SYSTEMTIMESTAMP -:Service_Order.datePosted) < 31)
+BEGIN
+DELETE FROM Service_Order;
+END;
+ */
+                  
 --
 -- --------------------------------------------------------------------
 -- POPULATE THE TABLES
@@ -154,7 +166,11 @@ INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.c
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
-INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer');                     
+INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer'); 
+INSERT INTO App_User VALUES ('JaneB', 'Jane Bikoko', 6328925723, 'janeb@lmail.com', 'Customer'); 
+INSERT INTO App_User VALUES ('Danielk', 'Daniel Kioko', 5938205825, 'danik@pmail.com', 'Customer'); 
+INSERT INTO App_User VALUES ('CarpetSweep', 'Arnold Rust', 3856412540, 'arnorf@carpetsweep.com', 'Provider');    
+INSERT INTO App_User VALUES ('InteriorDecor', 'Donna Mary', 3860153863, 'donm@interiordecor.com', 'Provider');                      
 --
 INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
                              'My name is Mike. I like me house to be clean :)' );
@@ -168,15 +184,25 @@ INSERT INTO Customer VALUES ('Cbing', '890 Marsh Ridge, Grand Rapids MI', 'Perso
                              'Looking for my house windows to be cleaned.' );
 INSERT INTO Customer VALUES ('ASkywalker', '6736 Jedi Path, Lansing MI', 'Personal',
                              'I do not like sand, it is course, rough, irritating, and it gets everywhere.');
+INSERT INTO Customer VALUES ('JaneB', '2146 L Michigan Dr , Grand Rapids MI', 'Professional',
+                             'Pet Health Vetinary is searching for a dedicated cleaning company');
+INSERT INTO Customer VALUES ('Danielk', '5234 South Haven Dr, Kentwood MI', 'Personal',
+                             'I have a set of couches that need detailing');
 --
 INSERT INTO Provider VALUES ('BathPros', 'We are the best in the biz of wiz!');
 INSERT INTO Provider VALUES ('RWBnGreen', 'We make your green show off some Red, White, and Blue.');
 INSERT INTO Provider VALUES ('MIFFLIN DUNDER', 'Helping you get your Scrant on since 2005');
+INSERT INTO Provider VALUES ('CarpetSweep', 'One stop shop for all your carpet cleaning needs');
+INSERT INTO Provider VALUES ('InteriorDecor', 'Turning homes into palaces');
 --
 INSERT INTO Provider_Branch VALUES ('BathPros', '3672 Division Ave, Grand Rapids MI');
 INSERT INTO Provider_Branch VALUES ('BathPros', '9002 22nd St, Grandville MI');
 INSERT INTO Provider_Branch VALUES ('RWBnGreen', '19 N Square, Grand Rapids MI');
 INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
+INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
+INSERT INTO Provider_Branch VALUES ('MIFFLIN DUNDER', '300 Office street ave NW, Scranton MI');
+INSERT INTO Provider_Branch VALUES ('CarpetSweep', '4396 Burton Street , Muskegon MI');
+INSERT INTO Provider_Branch VALUES ('InteriorDecor', '2956 L Michigan Dr, Grand Rapids MI');
 --
 INSERT INTO Task VALUES ('Dust', 'Clean dust from one or many rooms');
 INSERT INTO Task VALUES ('Mow lawn', 'Cut grass or lawn to a specified length');
@@ -184,12 +210,16 @@ INSERT INTO Task VALUES ('Yard-general', 'Typical landscaping tasks; mowing, wee
 INSERT INTO Task VALUES ('Bathroom-general', 'Typical bathroom tasks; toilet, shower, floor, mirror');
 INSERT INTO Task VALUES ('Window Cleaning', 'Expert bonded and insured window cleaners. Call for a free estimate Interior and Exterior');
 INSERT INTO Task VALUES ('HVAC','Comprehensive air duct cleaning service for every part of the HVAC system');
+INSERT INTO Task VALUES ('CarpetCleaning','Carpet cleaning for both indoor and out corridors');
+
 --
 INSERT INTO Provider_Specialized_Task VALUES ('BathPros', 'Bathroom-general');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Mow lawn');
 INSERT INTO Provider_Specialized_Task VALUES ('RWBnGreen', 'Yard-general');
 INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'Window Cleaning');
 INSERT INTO Provider_Specialized_Task VALUES ('MIFFLIN DUNDER', 'HVAC');
+INSERT INTO Provider_Specialized_Task VALUES ('CarpetSweep', 'CarpetCleaning');
+INSERT INTO Provider_Specialized_Task VALUES ('InteriorDecor', 'Dust');
 --
 INSERT INTO Service_Order VALUES (1, 'michaelb', NULL, 'Clean my 2 bathrooms each Wednesday',
                                   '1234 Evans Way, Grand Rapids MI', '19-NOV-18', '05-DEC-18');
@@ -203,6 +233,8 @@ INSERT INTO Service_Order VALUES (5, 'CatLady', 75, 'Clean my apartment from the
                                   '7889 116th St, Apt A, Grand Rapids MI', '26-NOV-18', NULL);
 INSERT INTO Service_Order VALUES (6, 'SarahH', 1300, 'Clean a recently vacated apartment',
                                   '7889 116th St, Apt 5B, Grand Rapids MI', '29-NOV-18', NULL);
+INSERT INTO Service_Order VALUES (7, 'Danielk', 300, 'Clean a set of couches',
+                                  '5234 South Haven Dr, Kentwood MI', '24-OCT-18', NULL);
 --
 INSERT INTO Task_In_Service_Order VALUES (1, 'Bathroom-general');
 INSERT INTO Task_In_Service_Order VALUES (2, 'Dust');
@@ -225,11 +257,16 @@ INSERT INTO Bid VALUES ('23-NOV-18', 4, 'MIFFLIN DUNDER', 700, 'T');
 INSERT INTO Bid VALUES ('25-NOV-18', 2, 'MIFFLIN DUNDER', 50, 'F');
 INSERT INTO Bid VALUES ('26-NOV-18', 2, 'RWBnGreen', 80, 'F');
 INSERT INTO Bid VALUES ('27-NOV-18', 2, 'MIFFLIN DUNDER', 90, 'T');
+INSERT INTO Bid VALUES ('25-OCT-18', 7, 'InteriorDecor', 5000, 'F');
+INSERT INTO Bid VALUES ('05-NOV-18', 7, 'InteriorDecor', 4500, 'F');
+
 --
 INSERT INTO Reviews VALUES ('SarahH', 'RWBnGreen', '22-NOV-18', 4,
                             'Would rate them 5 stars, but they mowed an American flag pattern into the yard.');
 INSERT INTO Reviews VALUES ('Cbing', 'MIFFLIN DUNDER', '26-NOV-18', 5,
                             'Great work done, windows looks real clean and shining.');
+INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
+                            'They were nice, but the one guy kept pranking the other so he stormed out.');
 INSERT INTO Reviews VALUES ('dusty', 'MIFFLIN DUNDER', '28-NOV-18', 2,
                             'They were nice, but the one guy kept pranking the other so he stormed out.');
 --
@@ -315,7 +352,7 @@ WHERE P.pUserName NOT IN (SELECT R.pUserName
                           FROM Reviews R);
 --
 -- Query 8: A relational DIVISION query
---  --> 
+--                 
 --
 -- Query 9: An outer join
 --  --> Find orders by customer, whether they have orders or not
@@ -356,9 +393,7 @@ INSERT INTO Provider VALUES ('BeeClean', 'We clean up after your bee-related mes
 --  --> Note that a user needs to enter if they are a customer or provider.
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com');
 --
--- Testing: User_2A_1
---  --> Note that a user must atleast have a phone or email for registration
-INSERT INTO App_User VALUES ('GoCleaners','John Doe', null, null, 'Provider');
+-- Testing: 
 --
 -- Testing: Service_Order_Photos_2R_1
 --  --> Note that during table creation, Service_Order 3 already had 5 photos added
