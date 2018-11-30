@@ -141,16 +141,16 @@ BEGIN
 END;
 /
 SHOW ERROR
-                     
+--
+-- Trigger for Constraint Service_Order_2R_2
 /*CREATE OR REPLACE TRIGGER Service_Order_2R_2
-BEFORE DELETE ON Service_Order 
-FOR EACH ROW                 
+BEFORE DELETE ON Service_Order
+FOR EACH ROW
 WHEN ((SYSTEMTIMESTAMP -:Service_Order.datePosted) < 31)
 BEGIN
 DELETE FROM Service_Order;
 END;
  */
-                  
 --
 -- --------------------------------------------------------------------
 -- POPULATE THE TABLES
@@ -165,11 +165,11 @@ INSERT INTO App_User VALUES ('Cbing','Chandler Bing', 2123457290, 'bing@mailsz.c
 INSERT INTO App_User VALUES ('BathPros', 'Andrew Gorski', 6163439732, 'service@bathpros.com', 'Provider');
 INSERT INTO App_User VALUES ('RWBnGreen', 'George Washington', 6167041776, 'sales@greenusa.com', 'Provider');
 INSERT INTO App_User VALUES ('MIFFLIN DUNDER','DWIGHT K. SCHRUTE', 2123457290, 'corporatesales@dundermiff.com', 'Provider');
-INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer'); 
+INSERT INTO App_User VALUES ('ASkywalker', 'Anakin Skywalker', 6828524792, 'askywalker@jedicouncil.com', 'Customer');
 INSERT INTO App_User VALUES ('JaneB', 'Jane Bikoko', 6328925723, 'janeb@lmail.com', 'Customer'); 
 INSERT INTO App_User VALUES ('Danielk', 'Daniel Kioko', 5938205825, 'danik@pmail.com', 'Customer'); 
-INSERT INTO App_User VALUES ('CarpetSweep', 'Arnold Rust', 3856412540, 'arnorf@carpetsweep.com', 'Provider');    
-INSERT INTO App_User VALUES ('InteriorDecor', 'Donna Mary', 3860153863, 'donm@interiordecor.com', 'Provider');                      
+INSERT INTO App_User VALUES ('CarpetSweep', 'Arnold Rust', 3856412540, 'arnorf@carpetsweep.com', 'Provider');
+INSERT INTO App_User VALUES ('InteriorDecor', 'Donna Mary', 3860153863, 'donm@interiordecor.com', 'Provider');
 --
 INSERT INTO Customer VALUES ('michaelb', '1234 Evans Way, Grand Rapids MI', 'Personal',
                              'My name is Mike. I like me house to be clean :)' );
@@ -399,4 +399,3 @@ INSERT INTO Service_Order_Photos VALUES (3, '<photo of grounds 6>');
 --
 --
 COMMIT;
-SPOOL OFF
